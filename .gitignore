@@ -115,3 +115,16 @@ dmypy.json
 .spyderproject
 .spyproject
 .ropeproject
+
+# Java files
+*.jar
+*.properties
+*.xml
+*.xml~
+*.orig
+*.mf
+*.gif
+*.png
+
+TimeSeriesClassification/src/applications/
+TimeSeriesClassification/src/papers/
