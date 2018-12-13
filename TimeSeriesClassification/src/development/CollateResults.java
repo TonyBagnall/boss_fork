@@ -830,14 +830,14 @@ public static void basicSummaryComparisons(){
 //Below is using my stats generator not james. To use James put in a static
 //method and exit, as above
 //    String[] classifiers={"BOSS","CAWPE","CAWPE_AS_COTE","ED","RandF","RotF","SLOWDTWCV","ST","TSF","RISE","XGBoost"};
-    String[] classifiers={"TunedSVMQuad"};
+    String[] classifiers={"TunedXGBoost"};
     for(String classifier:classifiers){
         String parameters="1";
         if(args.length>1)
             collate(args);
         else{ 
-            String[] str={"Z:\\BagsSDM\\Results\\",
-                "Z:\\BagsSDM\\Data\\","45","false",classifier,parameters};
+            String[] str={"\\\\cmptscsvr.cmp.uea.ac.uk\\ueatsc\\Results\\UCIContinuous\\",
+                "\\\\cmptscsvr.cmp.uea.ac.uk\\ueatsc\\Data\\UCIContinuous","30","false",classifier,parameters};
             collate(str);
         }
     }

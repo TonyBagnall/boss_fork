@@ -188,6 +188,10 @@ public class TimeSeriesInstances implements Iterable<TimeSeriesInstance>{
     public boolean validClassLabel(String s){
         return classLabels.contains(s);
     }
+    public int getNumSeries(){
+        return data.size();
+    }
+
     public int getClassValue(String s){
         for(int i=0;i<classLabels.size();i++)
             if(classLabels.get(i).equals(s))
