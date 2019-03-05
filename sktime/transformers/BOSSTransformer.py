@@ -1,10 +1,10 @@
 import numpy as np
 import math
 import sys
+from sktime.transformers.Transformer import Transformer
 
-#
 
-class BOSSTransform:
+class BOSSTransform(Transformer):
 
     def __init__(self, windowSize, wordLength, alphabetSize, norm):
         self.words = []
@@ -19,7 +19,7 @@ class BOSSTransform:
         self.num_insts = 0
         self.num_atts = 0
 
-    def transform_train(self, X):
+    def fit(self, X):
         self.num_insts, self.num_atts = X.shape
         self.breakpoints = self.MCB(X)
 

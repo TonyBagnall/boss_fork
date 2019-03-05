@@ -6,8 +6,8 @@ from sktime.classifiers.ensemble import TimeSeriesForestClassifier
 from sktime.transformers.series_to_tabular import RandomIntervalFeatureExtractor
 from sktime.pipeline import TSPipeline
 from sklearn.tree import DecisionTreeClassifier
-import sktime.classifiers.TimeSeriesForest as tsf
-import sktime.classifiers.BOSSClassifier as boss
+import sktime.classifiers.interval_based.TimeSeriesForest as tsf
+
 
 def time_series_slope(y):
     n = y.shape[0]
@@ -133,5 +133,5 @@ if __name__ == "__main__":
                                      oob_score=False,
                                      n_jobs=1)
             elif cls == "BOSSPY":
-                classifier = boss.BOSSClassifier()
+                classifier = BOSS.BOSSClassifier()
             defaultTrainTestFold(classifier,problem,"E:/Results/UCR/Python/"+cls+"/Predictions/","E:/TSCProblems/")

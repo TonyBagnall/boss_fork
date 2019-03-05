@@ -1,4 +1,4 @@
-from sktime.classifiers.BOSSTransform import BOSSTransform
+from sktime.transformers.BOSSTransformer import BOSSTransform
 import numpy as np
 import random
 import sys
@@ -172,7 +172,7 @@ class BOSSIndividual:
         self.accuracy = 0
 
     def fit(self, X, y):
-        self.transformedData = self.transform.transform_train(X)
+        self.transformedData = self.transform.fit(X)
         self.classVals = y
 
     def predict(self, X):
