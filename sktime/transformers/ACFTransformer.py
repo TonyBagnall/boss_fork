@@ -3,7 +3,6 @@ import LoadData as ld
 #import pandas as pd
 from sktime.transformers.Transformer import Transformer
 
-#https://www.statsmodels.org/0.9.0/_modules/statsmodels/tsa/stattools.html#acf
 
 class ACFTransformer(Transformer):
 #    global MAX_LAG=100
@@ -13,20 +12,31 @@ class ACFTransformer(Transformer):
         self._end_terms=end_terms
 
     def transform(self, X):
+        lag=self._lag
         n_samps, self._num_atts = X.shape
-        if self._lag>self._num_atts-self._end_terms:
-            self._lag=self._num_atts-self._end_terms
-        if self._lag < 0:
-            self._lag=self._num_atts
-        transformedX = np.empty(shape=(n_samps,self._lag))
+        if lag>self._num_atts-self._end_terms:
+            lag=self._num_atts-self._end_terms
+        if lag < 0:
+            lag=self._num_atts
+        transformedX = np.empty(shape=(n_samps,lag))
         for i in range(0,n_samps):
-            transformedX[i] = self.acf(X[i])
+            transformedX[i] = self.acf(X[i],lag)
         return transformedX
 
-    def acf(self,x):
-        y = np.zeros(self._lag)
-        for lag in range(1, self._lag+1):
+
+    def acf(self,x,maxLag):
+        y = np.zeros(maxLag)
+        for lag in range(1, maxLag+1):
+#            s1=np.sum(x[:-lag])/x.shape()[0]
+#            ss1=s1*s1
+#            s2=np.sum(x[lag:])
+#            ss2=s2*s2
+#
             y[lag - 1] = np.corrcoef(x[lag:], x[:-lag])[0][1]
+            if np.isnan(y[lag - 1]) or np.isinf(y[lag-1]):
+                y[lag-1]=0
+
+
         return np.array(y)
 
 if __name__ == "__main__":

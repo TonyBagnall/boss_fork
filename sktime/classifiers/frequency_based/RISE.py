@@ -4,8 +4,10 @@ import numpy as np
 import pandas as pd
 from numpy import random
 from copy import deepcopy
-from transformers import ACFTransformer
-from transformers import PowerSpectrumTransformer
+from sktime.transformers import ACFTransformer as acf
+from sktime.transformers import PowerSpectrumTransformer as ps
+from sklearn.ensemble.forest import ForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 # RandomIntervalSpectralForest: Port from Java
 # Implementation of RISE from Lines 2017:
@@ -28,8 +30,6 @@ from transformers import PowerSpectrumTransformer
 #
 
 
-
-
 class RandomIntervalSpectralForest(ForestClassifier):
 
     def __init__(self,
@@ -37,7 +37,7 @@ class RandomIntervalSpectralForest(ForestClassifier):
                  random_state=None,
                  min_interval=9,
                  verbose=0):
-        super(TimeSeriesForest, self).__init__(
+        super(RandomIntervalSpectralForest, self).__init__(
             base_estimator=DecisionTreeClassifier(),
             n_estimators=n_trees)
         self._num_trees=n_trees
@@ -50,8 +50,8 @@ class RandomIntervalSpectralForest(ForestClassifier):
         self._intervals=[]
         self.dim_to_use = 0 #For the multivariate case treating this as a univariate classifier
         self._min_interval=min_interval
-        acf=ACFTransformer()
-        ps=PowerSpectrumTransformer()
+        self._acf=acf.ACFTransformer()
+        self._ps=ps.PowerSpectrumTransformer()
 
     def fit(self, X, y, sample_weight=None):
 
@@ -71,9 +71,10 @@ class RandomIntervalSpectralForest(ForestClassifier):
         for i in range(1, self._num_trees):
             self._intervals[i][0]=random.randint(self._num_atts-self._min_interval)
             self._intervals[i][1]=random.randint(self._intervals[i][0]+self._min_interval, self._num_atts)
-            acf_x = acf.transform(X[:, self._intervals[i][0]:self._intervals[i][1]])
-            ps_x=ps.transform(X[:, self._intervals[i][0]:self._intervals[i][1]])
-            transformed_x=np.concatenate(acf_x,ps_x)
+        for i in range(0, self._num_trees):
+            acf_x = self._acf.transform(X[:, self._intervals[i][0]:self._intervals[i][1]])
+            ps_x=self._ps.transform(X[:, self._intervals[i][0]:self._intervals[i][1]])
+            transformed_x=np.concatenate((acf_x,ps_x),axis=1)
             tree = deepcopy(self.base_estimator)
             tree.fit(transformed_x, y)
             self._classifiers.append(tree)
@@ -89,7 +90,7 @@ class RandomIntervalSpectralForest(ForestClassifier):
                 X = np.asarray([a.values for a in X.iloc[:,0]])
             else:
                 raise TypeError("Input should either be a 2d numpy array, or a pandas dataframe containing Series objects")
-
+        rows,cols=X.shape
         #HERE Do transform againnum_att
         n_samps, num_atts = X.shape
         if num_atts != self._num_atts:
@@ -97,15 +98,9 @@ class RandomIntervalSpectralForest(ForestClassifier):
             return
         sums = np.zeros((X.shape[0],self._num_classes), dtype=np.float64)
         for i in range(0, self._num_trees):
-            transformed_x = np.empty(shape=(3*self._num_intervals,n_samps),dtype=np.float32)
-            for j in range(0,self._num_intervals):
-                means = np.mean(X[:, self._intervals[i][j][0]:self._intervals[i][j][1]], axis=1)
-                std_dev = np.std(X[:, self._intervals[i][j][0]:self._intervals[i][j][1]], axis=1)
-                slope = self.lsq_fit(X[:, self._intervals[i][j][0]:self._intervals[i][j][1]])
-                transformed_x[3*j]=means
-                transformed_x[3*j+1]=std_dev
-                transformed_x[3*j+2]=slope
-            transformed_x=transformed_x.T
+            acf_x = self._acf.transform(X[:, self._intervals[i][0]:self._intervals[i][1]])
+            ps_x=self._ps.transform(X[:, self._intervals[i][0]:self._intervals[i][1]])
+            transformed_x=np.concatenate((acf_x,ps_x),axis=1)
             sums += self._classifiers[i].predict_proba(transformed_x)
 
         output = sums / (np.ones(self._num_classes) * self.n_estimators)

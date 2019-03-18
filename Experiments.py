@@ -7,6 +7,8 @@ from sktime.transformers.series_to_tabular import RandomIntervalFeatureExtractor
 from sktime.pipeline import TSPipeline
 from sklearn.tree import DecisionTreeClassifier
 import sktime.classifiers.interval_based.TimeSeriesForest as tsf
+import sktime.classifiers.dictionary_based.BOSS as boss
+import sktime.classifiers.frequency_based.RISE as rise
 
 
 def time_series_slope(y):
@@ -66,15 +68,12 @@ def defaultTrainTestFold(classifier, dataset_name, results_path, problem_path):
         for index, selected_class in enumerate(np.unique(train_y)):
             class_dictionary[selected_class]=index
 
-        for temp in class_dictionary:
-            print(str(temp))
         predA_y = classifier.predict_proba(test_x)
 
         correct = 0
         for i in range(0, pred_y.__len__()):
             if pred_y[i] == test_y[i]:
                 correct += 1
-        print(correct)
         ac = correct / pred_y.__len__()
         print(" Accuracy =")
         print(ac)
@@ -108,11 +107,12 @@ def defaultTrainTestFold(classifier, dataset_name, results_path, problem_path):
 
 if __name__ == "__main__":
 
-    cls ="BOSSPY"
-    problem_list="E:/Data/DataSetLists/TSC_85_2015.txt"
-
-#    problem_list="E:/Data/DataSetLists/Random.txt"
+    cls ="RISE_Tony"
+#    problem_list="E:/Data/DataSetLists/TSC_85_2015.txt"
+#    problem_list="E:/Data/DataSetLists/TSC2015NoPigsReversed.txt"
+    problem_list="E:/Data/DataSetLists/Random.txt"
 #    problem_list="E:/Data/DataSetLists/TSC2015NoPigs.txt"
+    results_loc="E:/Results/UCR/Python/"
     with open(problem_list) as f:
         lines= f.read().splitlines()
         for problem in lines:
@@ -120,8 +120,10 @@ if __name__ == "__main__":
 #            if cls=="RotF":
 #                classifier = rf.RotationForest(n_estimators=200)
             if cls=="TSF_Tony":
+                print(cls)
                 classifier = tsf.TimeSeriesForest(n_trees=500)
             elif cls == "TSF_Marcus":
+                print(cls)
                 features = [np.mean, np.std, time_series_slope]
                 steps = [('transform', RandomIntervalFeatureExtractor(n_intervals='sqrt', features=features)),
                          ('clf', DecisionTreeClassifier())]
@@ -133,5 +135,9 @@ if __name__ == "__main__":
                                      oob_score=False,
                                      n_jobs=1)
             elif cls == "BOSSPY":
-                classifier = BOSS.BOSSClassifier()
-            defaultTrainTestFold(classifier,problem,"E:/Results/UCR/Python/"+cls+"/Predictions/","E:/TSCProblems/")
+                print(cls)
+                classifier = boss.BOSSClassifier()
+            elif cls == "RISE" or cls == "RISE_Tony":
+                print(cls)
+                classifier = rise.RandomIntervalSpectralForest(n_trees=500)
+            defaultTrainTestFold(classifier,problem,results_loc+cls+"/Predictions/","E:/TSCProblems/")

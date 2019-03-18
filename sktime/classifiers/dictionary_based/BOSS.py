@@ -2,6 +2,7 @@ from sktime.transformers.BOSSTransformer import BOSSTransform
 import numpy as np
 import random
 import sys
+import pandas as pd
 
 class BOSSClassifier():
 
@@ -22,8 +23,17 @@ class BOSSClassifier():
         self.classes_ = []
         self.class_dictionary = {}
         self.numClassifiers = 0
+        self.dim_to_use = 0 #For the multivariate case treating this as a univariate classifier
+
 
     def fit(self, X, y):
+        if isinstance(X, pd.DataFrame):
+            if isinstance(X.iloc[0,self.dim_to_use],pd.Series):
+                X = np.asarray([a.values for a in X.iloc[:,0]])
+            else:
+                raise TypeError("Input should either be a 2d numpy array, or a pandas dataframe containing Series objects")
+
+
         num_insts, num_atts = X.shape
         self._num_classes = np.unique(y).shape[0]
         self.classes_ = list(set(y))
@@ -103,6 +113,12 @@ class BOSSClassifier():
         return [self.classes_[np.argmax(prob)] for prob in self.predict_proba(X)]
 
     def predict_proba(self, X):
+        if isinstance(X, pd.DataFrame):
+            if isinstance(X.iloc[0,self.dim_to_use],pd.Series):
+                X = np.asarray([a.values for a in X.iloc[:,0]])
+            else:
+                raise TypeError("Input should either be a 2d numpy array, or a pandas dataframe containing Series objects")
+
         sums = np.zeros((X.shape[0], self._num_classes))
 
         for i, clf in enumerate(self.classifiers):
