@@ -1,0 +1,7 @@
+sktime.transformers.example\_transformers module
+================================================
+
+.. automodule:: sktime.transformers.example_transformers
+    :members:
+    :undoc-members:
+    :show-inheritance:

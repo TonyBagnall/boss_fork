@@ -1,0 +1,501 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Extension Guidelines &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Loading Data in sktime" href="examples/loading_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="autogen/sktime.html">sktime package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Extension Guidelines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#package-structure">Package Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#regressors">Regressors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#constructor">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fit">fit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#predict">predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example">example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#classifiers">Classifiers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">fit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">predict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#predict-proba-optional">predict_proba (optional)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transformers">Transformers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Constructor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">fit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transform">transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Extension Guidelines</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/extension.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="extension-guidelines">
+<h1>Extension Guidelines<a class="headerlink" href="#extension-guidelines" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="package-structure">
+<h2>Package Structure<a class="headerlink" href="#package-structure" title="Permalink to this headline">¶</a></h2>
+<p>The (typical) directory structure of the module is shown below.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sktime
+├── __init__.py
+├── classifiers
+│   ├── __init__.py
+│   ├── base.py
+│   ├── example_classifiers.py
+│   └── time_domain_classification
+│       ├── __init__.py
+│       ├── elastic_ensemble.py
+│       └── ts_distance_measures.py
+├── model_selection.py
+├── regressors
+│   ├── __init__.py
+│   ├── base.py
+│   ├── example_regressors.py
+├── tests
+│   ├── __init__.py
+│   ├── test_common.py
+│   ├── test_pipelines.py
+│   ├── test_TSDummyClassifier.py
+│   ├── test_TSDummyRegressor.py
+│   ├── test_TSExampleClassifier.py
+│   └── test_TSExampleRegressor.py
+├── transformers
+│   ├── __init__.py
+│   ├── base.py
+│   ├── compose.py
+│   ├── example_transformers.py
+│   ├── series_to_series.py
+│   └── series_to_tabular.py
+└── utils
+    ├── __init__.py
+    ├── estimator_checks.py
+    ├── load_data.py
+    └── validation.py
+</pre></div>
+</div>
+<p>Each directory (with an <cite>__init__.py</cite>) file is considered as a package and each <cite>.py</cite> file is considered as a module in that package or sub-package. Packages consist of a number of modules and each module has a number of functions or classes that could be logically grouped together.</p>
+</div>
+<div class="section" id="regressors">
+<h2>Regressors<a class="headerlink" href="#regressors" title="Permalink to this headline">¶</a></h2>
+<p>All regressors should inherit from BaseRegressor from <cite>sktime/regressors/base.py</cite>. At the very least it should have a constructor, fit function and predict function.</p>
+<div class="section" id="constructor">
+<h3>Constructor<a class="headerlink" href="#constructor" title="Permalink to this headline">¶</a></h3>
+<p>The <cite>__init__()</cite> constructor should get all hyperparameters as keyword arguments and assign them to pubic members of the same name.
+Should also have a keyword argument <cite>check_inputs=True</cite> defaulting to True.</p>
+</div>
+<div class="section" id="fit">
+<h3>fit<a class="headerlink" href="#fit" title="Permalink to this headline">¶</a></h3>
+<p>The fit function takes <cite>X</cite> and <cite>y</cite> as inputs.
+It should perform input checks if and only if the regressor is constructed with <cite>check_inputs=True</cite>.
+Input checks can be performed using <cite>check_ts_X_y(X,y)</cite>.
+The fit function, after performing the fitting operation if any, should set the is_setted flag <cite>self.is_fitted_=True</cite>.
+It should return <cite>self</cite>, which is the regressor itself.</p>
+</div>
+<div class="section" id="predict">
+<h3>predict<a class="headerlink" href="#predict" title="Permalink to this headline">¶</a></h3>
+<p>The predict function takes only <cite>X</cite>.
+It should always check for validity of inputs.
+Input checks can be performed using <cite>check_ts_array(X)</cite>.
+It should check if the regressor is already fit using <cite>check_is_fitted(self, ‘is_fitted_’)</cite>
+The predict function, should make predictions and return these predictions.</p>
+</div>
+<div class="section" id="example">
+<h3>example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<p>The following is an example regressor</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># use relative imports for sub-packages and modules of sktime</span>
+<span class="kn">from</span> <span class="nn">..utils.validation</span> <span class="kn">import</span> <span class="n">check_ts_X_y</span><span class="p">,</span> <span class="n">check_ts_array</span><span class="p">,</span> <span class="n">check_is_fitted</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">BaseRegressor</span>
+
+<span class="k">class</span> <span class="nc">MyRegresor</span><span class="p">(</span><span class="n">BaseRegressor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;docstring here using numpy syntax</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_inputs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">param1</span><span class="o">=</span><span class="n">value1</span><span class="p">,</span> <span class="n">param2</span><span class="o">=</span><span class="n">value2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param1</span> <span class="o">=</span> <span class="n">value1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param2</span> <span class="o">=</span> <span class="n">value2</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;docstring here using numpy syntax</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_inputs</span><span class="p">:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">check_ts_X_y</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="c1"># perform fitting here</span>
+        <span class="o">...</span>
+        <span class="c1"># set completion flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted_</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c1"># `fit` should always return `self`</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;docstring here using numpy syntax</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">check_ts_array</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;is_fitted_&#39;</span><span class="p">)</span>
+        <span class="c1"># predict here</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="o">...</span>
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="classifiers">
+<h2>Classifiers<a class="headerlink" href="#classifiers" title="Permalink to this headline">¶</a></h2>
+<p>All classifiers should inherit from BaseClassifier from <cite>sktime/classifiers/base.py</cite>. At the very least it should have a constructor, fit function and predict function.</p>
+<div class="section" id="id1">
+<h3>Constructor<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>The <cite>__init__()</cite> constructor should get all hyperparameters as keyword arguments and assign them to pubic members of the same name.
+Should also have a keyword argument <cite>check_inputs=True</cite> defaulting to True.</p>
+</div>
+<div class="section" id="id2">
+<h3>fit<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>The fit function takes <cite>X</cite> and <cite>y</cite> as inputs.
+It should perform input checks if and only if the classifier is constructed with <cite>check_inputs=True</cite>.
+Input checks can be performed using <cite>check_ts_X_y(X,y)</cite>.
+The fit function, after performing the fitting operation if any, should set the is_setted flag <cite>self.is_fitted_=True</cite>.
+It should return <cite>self</cite>, which is the classifier itself.</p>
+</div>
+<div class="section" id="id3">
+<h3>predict<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>The predict function takes only <cite>X</cite>.
+It should always check for validity of inputs.
+Input checks can be performed using <cite>check_ts_array(X)</cite>.
+It should check if the classifier is already fit using <cite>check_is_fitted(self, ‘is_fitted_’)</cite>
+The predict function, should make predictions and return these predictions.</p>
+</div>
+<div class="section" id="predict-proba-optional">
+<h3>predict_proba (optional)<a class="headerlink" href="#predict-proba-optional" title="Permalink to this headline">¶</a></h3>
+<p>The predict_proba function takes only <cite>X</cite>.
+It should always check for validity of inputs.
+Input checks can be performed using <cite>check_ts_array(X)</cite>.
+It should check if the classifier is already fit using <cite>check_is_fitted(self, ‘is_fitted_’)</cite>
+The predict_proba function, should make predictions and return these prediction probabilities for each classes.</p>
+</div>
+<div class="section" id="id4">
+<h3>example<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>The following is an example classifier</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># use relative imports for sub-packages and modules of sktime</span>
+<span class="kn">from</span> <span class="nn">..utils.validation</span> <span class="kn">import</span> <span class="n">check_ts_X_y</span><span class="p">,</span> <span class="n">check_ts_array</span><span class="p">,</span> <span class="n">check_is_fitted</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">BaseClassifier</span>
+
+<span class="k">class</span> <span class="nc">MyClassifier</span><span class="p">(</span><span class="n">BaseClassifier</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;docstring here using numpy syntax</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_inputs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">param1</span><span class="o">=</span><span class="n">value1</span><span class="p">,</span> <span class="n">param2</span><span class="o">=</span><span class="n">value2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param1</span> <span class="o">=</span> <span class="n">value1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param2</span> <span class="o">=</span> <span class="n">value2</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;docstring here using numpy syntax</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_inputs</span><span class="p">:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">check_ts_X_y</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="c1"># perform fitting here</span>
+        <span class="o">...</span>
+        <span class="c1"># set completion flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted_</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c1"># `fit` should always return `self`</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;docstring here using numpy syntax</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">check_ts_array</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;is_fitted_&#39;</span><span class="p">)</span>
+        <span class="c1"># predict here</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="o">...</span>
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="transformers">
+<h2>Transformers<a class="headerlink" href="#transformers" title="Permalink to this headline">¶</a></h2>
+<p>All transformers should inherit from BaseTransformer from <cite>sktime/transformers/base.py</cite>. At the very least it should have a constructor, fit function and predict function.
+Based on the inputs types they work with and the return data type, the transformers can be classified as</p>
+<blockquote>
+<div><ul class="simple">
+<li>series to series
+- per row transformer
+- per column transformer</li>
+<li>series to tabular
+- per row transformer
+- per column transformer</li>
+</ul>
+</div></blockquote>
+<p>The class definitions shoud be placed in the corresponding locations in the folder structure.</p>
+<div class="section" id="id5">
+<h3>Constructor<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>The <cite>__init__()</cite> constructor should get all hyperparameters as keyword arguments and assign them to pubic members of the same name.
+Should also have a keyword argument <cite>check_inputs=True</cite> defaulting to True.</p>
+</div>
+<div class="section" id="id6">
+<h3>fit<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p>The fit function takes <cite>X</cite> and <cite>y</cite> as inputs.
+<cite>y</cite> is a dummy input and should always take the default value None.
+It should perform input checks if and only if the transformer is constructed with <cite>check_inputs=True</cite>.
+Input checks can be performed using <cite>check_ts_array(X)</cite>.
+The fit function, after performing the fitting operation if any, should set the is_setted flag <cite>self.is_fitted_=True</cite>.
+It should return <cite>self</cite>, which is the transformer itself.</p>
+</div>
+<div class="section" id="transform">
+<h3>transform<a class="headerlink" href="#transform" title="Permalink to this headline">¶</a></h3>
+<p>The transform function takes only <cite>X</cite>.
+It should perform input checks if and only if the transformer is constructed with <cite>check_inputs=True</cite>.
+Input checks can be performed using <cite>check_ts_array(X)</cite>.
+It should check if the transformer is already fit using <cite>check_is_fitted(self, ‘is_fitted_’)</cite>
+The transform function, should return the appropriately transformed data.</p>
+</div>
+<div class="section" id="id7">
+<h3>example<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<p>The following is an example transformer</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># use relative imports for sub-packages and modules of sktime</span>
+<span class="kn">from</span> <span class="nn">..utils.validation</span> <span class="kn">import</span> <span class="n">check_ts_X_y</span><span class="p">,</span> <span class="n">check_ts_array</span><span class="p">,</span> <span class="n">check_is_fitted</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">BaseTransformer</span>
+
+<span class="k">class</span> <span class="nc">MyTransformer</span><span class="p">(</span><span class="n">BaseTransformer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;docstring here using numpy syntax</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_inputs</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">param1</span><span class="o">=</span><span class="n">value1</span><span class="p">,</span> <span class="n">param2</span><span class="o">=</span><span class="n">value2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param1</span> <span class="o">=</span> <span class="n">value1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">param2</span> <span class="o">=</span> <span class="n">value2</span>
+
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;docstring here using numpy syntax</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_inputs</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">check_ts_array</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="c1"># perform fitting here</span>
+        <span class="o">...</span>
+        <span class="c1"># set completion flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted_</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="c1"># `fit` should always return `self`</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;docstring here using numpy syntax</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_inputs</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">check_ts_array</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;is_fitted_&#39;</span><span class="p">)</span>
+        <span class="c1"># transform the input here</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="o">...</span>
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="examples/loading_data.html" class="btn btn-neutral float-left" title="Loading Data in sktime" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

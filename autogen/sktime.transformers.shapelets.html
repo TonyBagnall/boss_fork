@@ -1,0 +1,570 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sktime.transformers.shapelets module &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sktime.highlevel module" href="sktime.highlevel.html" />
+    <link rel="prev" title="sktime.transformers.series_to_tabular module" href="sktime.transformers.series_to_tabular.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="sktime.html">sktime package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="sktime.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="sktime.classifiers.html">sktime.classifiers package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sktime.datasets.html">sktime.datasets package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sktime.regressors.html">sktime.regressors package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="sktime.transformers.html">sktime.transformers package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="sktime.transformers.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sktime.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extension.html">Extension Guidelines</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="sktime.html">sktime package</a> &raquo;</li>
+        
+          <li><a href="sktime.transformers.html">sktime.transformers package</a> &raquo;</li>
+        
+      <li>sktime.transformers.shapelets module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autogen/sktime.transformers.shapelets.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-sktime.transformers.shapelets">
+<span id="sktime-transformers-shapelets-module"></span><h1>sktime.transformers.shapelets module<a class="headerlink" href="#module-sktime.transformers.shapelets" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="sktime.transformers.shapelets.ContractedRandomShapeletTransform">
+<em class="property">class </em><code class="descclassname">sktime.transformers.shapelets.</code><code class="descname">ContractedRandomShapeletTransform</code><span class="sig-paren">(</span><em>min_shapelet_length=3</em>, <em>max_shapelet_length=inf</em>, <em>initial_num_shapelets_per_case=15</em>, <em>time_limit_in_mins=60.0</em>, <em>seed=0</em>, <em>dim_to_use=0</em>, <em>remove_self_similar=True</em>, <em>verbose=False</em>, <em>use_binary_info_gain=True</em>, <em>trim_shapelets=True</em>, <em>num_shapelets_to_trim_to=200</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/shapelets.html#ContractedRandomShapeletTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.shapelets.ContractedRandomShapeletTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sktime.transformers.shapelets.RandomShapeletTransform" title="sktime.transformers.shapelets.RandomShapeletTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">sktime.transformers.shapelets.RandomShapeletTransform</span></code></a></p>
+<p>Contracted Random Shapelet Transform (extends Random Shapelet Transform).</p>
+<p>A transformer to extract shapelets from a training dataset, then transform any
+passed dataset into primitives using each extracted shapelet. For k shapelets,
+an input case q is transformed by calculating the distance from q to each shapelet
+and the transformed output case is composed of k features, where the kth attribute
+is the distance from q to the kth shapelet.</p>
+<p>This implementation of the transform is based on the findings in [2]; it uses random
+sampling of candidate shapelets, rather than a full enumeration of candidates as
+originally proposed in [1], as it has been shown that there is no significant
+decrease in accuracy but a significant reduction in runtime through this approach.</p>
+<p>There are two versions of the transform: RandomShapeletTransform and
+ContractedRandomShapeletTransform. For each training series visited, both
+implementations assess a specified number of candidate shapelets per series. However,
+this version uses a contracted time limit; it visits a series, extracts an explict
+number of shapelets, and then moves onto the next series. This continues until the
+time limit is breached, and if the end of the data is reached first, the algorithm
+will loop back round to the first series and extract the specified number of shapelets
+again. The time limit is specified in minutes and is a lower-bound; if a shapelet is
+being evaluated when the time limit is reached, it will complete before the extraction
+process exits.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>min_shapelet_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default = 3</em><em>)</em>) – The minimum candidate shapelet length</li>
+<li><strong>max_shapelet_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default = np.inf</em><em>)</em>) – The maximum candidate shapelet length (default = np.inf). This value is
+an upper-bound and is automatically capped to the series length if the
+specified value exceeds the length of the shapelet.</li>
+<li><strong>time_limit_in_mins</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a><em> (</em><em>default = 60.0</em><em>)</em>) – The contract time limit to continue shapelet extraction. This is a lower-bound as a
+shapelet candidate will not be abandoned if the time limit runs out.</li>
+<li><strong>initial_num_shapelets_per_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default = 15</em><em>)</em>) – The number of shapelet candidates to evaluate per series in the fit method initially.
+If there is sufficient time remaining on the contract after this number of shapelets
+have been evaluated from all training series, the search will continue at the start
+of the data and extract this many shapelets from each series again.</li>
+<li><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default = 0</em><em>)</em>) – To seed the shapelet discovery to ensure deterministic results across multiple runs</li>
+<li><strong>dim_to_use</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default = 0</em><em>)</em>) – Which dimension of the data to use</li>
+<li><strong>remove_self_similar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a><em> (</em><em>default = True</em><em>)</em>) – Whether to remove self-similar shapelets before transforming. A candidate shapelet
+is considered to be self-similar to another candidate if they are taken from the
+same dimension of the same training series. With this set to True, any overlapping
+candidates will be removed to preserve the best candidate (i.e. highest info gain)</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a><em> (</em><em>default = False</em><em>)</em>) – Whether to print information during shapelet extraction</li>
+<li><strong>use_binary_info_gain</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a><em> (</em><em>default = True</em><em>)</em>) – Whether to use one-vs-all information gain (as in [2]) or consider each class
+independently when calculating the information gain of a candidate (as in [1])</li>
+<li><strong>trim_shapelets</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a><em> (</em><em>default = True</em><em>)</em>) – Whether to crop the final list of extracted shapelets to the top k. If specified,
+this is an upper-bound; if less than k shapelets are found then this parameter will
+have no effect</li>
+<li><strong>num_shapelets_to_trim_to</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default = 200</em><em>)</em>) – If trim_shapelets = True, this is the number of shapelets to trim to.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="sktime.transformers.shapelets.ContractedRandomShapeletTransform.shapelets">
+<code class="descname">shapelets</code><a class="headerlink" href="#sktime.transformers.shapelets.ContractedRandomShapeletTransform.shapelets" title="Permalink to this definition">¶</a></dt>
+<dd><p>The list of extracted shapelets after fit is called (initially shapelets = None)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list of Shapelet objects</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p class="rubric">References</p>
+<p>[1] Hills, Jon, Jason Lines, Edgaras Baranauskas, James Mapp, and Anthony Bagnall.
+“Classification of time series by shapelet transformation.” Data Mining and Knowledge
+Discovery 28, no. 4 (2014): 851-881.</p>
+<p>[2] Bostrom, Aaron, and Anthony Bagnall.
+“Binary shapelet transform for multiclass time series classification.”
+In Transactions on Large-Scale Data-and Knowledge-Centered Systems XXXII,
+pp. 24-46. Springer, Berlin, Heidelberg, 2017.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sktime.transformers.shapelets.RandomShapeletTransform">
+<em class="property">class </em><code class="descclassname">sktime.transformers.shapelets.</code><code class="descname">RandomShapeletTransform</code><span class="sig-paren">(</span><em>min_shapelet_length=3</em>, <em>max_shapelet_length=inf</em>, <em>num_cases_to_sample=5</em>, <em>num_shapelets_to_sample_per_case=15</em>, <em>seed=0</em>, <em>dim_to_use=0</em>, <em>remove_self_similar=True</em>, <em>verbose=False</em>, <em>use_binary_info_gain=True</em>, <em>trim_shapelets=True</em>, <em>num_shapelets_to_trim_to=200</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/shapelets.html#RandomShapeletTransform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.shapelets.RandomShapeletTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sktime.transformers.base.html#sktime.transformers.base.BaseTransformer" title="sktime.transformers.base.BaseTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">sktime.transformers.base.BaseTransformer</span></code></a></p>
+<p>Random Shapelet Transform.</p>
+<p>A transformer to extract shapelets from a training dataset, then transform any
+passed dataset into primitives using each extracted shapelet. For k shapelets,
+an input case q is transformed by calculating the distance from q to each shapelet
+and the transformed output case is composed of k features, where the kth attribute
+is the distance from q to the kth shapelet.</p>
+<p>This implementation of the transform is based on the findings in [2]; it uses random
+sampling of candidate shapelets, rather than a full enumeration of candidates as
+originally proposed in [1], as it has been shown that there is no significant
+decrease in accuracy but a significant reduction in runtime through this approach.</p>
+<p>There are two versions of the transform: RandomShapeletTransform and
+ContractedRandomShapeletTransform. For each training series visited, both
+implementations assess a specified number of candidate shapelets per series. However,
+this version visits an explict number of cases to extract these shapelets from (from
+1 to len(X), whereas ContractedRandomShapeletTransform visits training cases while
+time remains on a contact (specified in minutes).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>min_shapelet_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default = 3</em><em>)</em>) – The minimum candidate shapelet length</li>
+<li><strong>max_shapelet_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default = np.inf</em><em>)</em>) – The maximum candidate shapelet length (default = np.inf). This value is
+an upper-bound and is automatically capped to the series length if the
+specified value exceeds the length of the shapelet.</li>
+<li><strong>num_cases_to_sample</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default = 5</em><em>)</em>) – The number of training cases to extract candidate shapelets from.</li>
+<li><strong>num_shapelets_to_sample_per_case</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default = 15</em><em>)</em>) – The number of shapelet candidates to evaluate per series in the fit method</li>
+<li><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default = 0</em><em>)</em>) – To seed the shapelet discovery to ensure deterministic results across multiple runs</li>
+<li><strong>dim_to_use</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default = 0</em><em>)</em>) – Which dimension of the data to use</li>
+<li><strong>remove_self_similar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a><em> (</em><em>default = True</em><em>)</em>) – Whether to remove self-similar shapelets before transforming. A candidate shapelet
+is considered to be self-similar to another candidate if they are taken from the
+same dimension of the same training series. With this set to True, any overlapping
+candidates will be removed to preserve the best candidate (i.e. highest info gain)</li>
+<li><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a><em> (</em><em>default = False</em><em>)</em>) – Whether to print information during shapelet extraction</li>
+<li><strong>use_binary_info_gain</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a><em> (</em><em>default = True</em><em>)</em>) – Whether to use one-vs-all information gain (as in [2]) or consider each class
+independently when calculating the information gain of a candidate (as in [1])</li>
+<li><strong>trim_shapelets</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a><em> (</em><em>default = True</em><em>)</em>) – Whether to crop the final list of extracted shapelets to the top k. If specified,
+this is an upper-bound; if less than k shapelets are found then this parameter will
+have no effect</li>
+<li><strong>num_shapelets_to_trim_to</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> (</em><em>default = 200</em><em>)</em>) – If trim_shapelets = True, this is the number of shapelets to trim to.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="sktime.transformers.shapelets.RandomShapeletTransform.shapelets">
+<code class="descname">shapelets</code><a class="headerlink" href="#sktime.transformers.shapelets.RandomShapeletTransform.shapelets" title="Permalink to this definition">¶</a></dt>
+<dd><p>The list of extracted shapelets after fit is called (initially shapelets = None)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list of Shapelet objects</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>[1] Hills, Jon, Jason Lines, Edgaras Baranauskas, James Mapp, and Anthony Bagnall.
+“Classification of time series by shapelet transformation.” Data Mining and Knowledge
+Discovery 28, no. 4 (2014): 851-881.</p>
+<p>[2] Bostrom, Aaron, and Anthony Bagnall.
+“Binary shapelet transform for multiclass time series classification.”
+In Transactions on Large-Scale Data-and Knowledge-Centered Systems XXXII,
+pp. 24-46. Springer, Berlin, Heidelberg, 2017.</p>
+<dl class="staticmethod">
+<dt id="sktime.transformers.shapelets.RandomShapeletTransform.calc_info_gain">
+<em class="property">static </em><code class="descname">calc_info_gain</code><span class="sig-paren">(</span><em>orderline</em>, <em>class_counts</em>, <em>total</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/shapelets.html#RandomShapeletTransform.calc_info_gain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.shapelets.RandomShapeletTransform.calc_info_gain" title="Permalink to this definition">¶</a></dt>
+<dd><p>A static method to calculate the information gain of a candidate shapelet
+when given an orderline and class distribution of distances to a dataset.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>orderline</strong> (<em>pandas DataFrame</em>) – The input dataframe to transform</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>output</strong> – The transformed dataframe in tabular format.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sktime.transformers.shapelets.RandomShapeletTransform.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y</em>, <em>**fit_params</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/shapelets.html#RandomShapeletTransform.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.shapelets.RandomShapeletTransform.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>A method to fit the shapelet transform to a specified X and y</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>pandas DataFrame</em>) – The training input samples.</li>
+<li><strong>y</strong> (<em>array-like</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – The class values for X</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>self</strong> – This estimator</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#sktime.transformers.shapelets.RandomShapeletTransform" title="sktime.transformers.shapelets.RandomShapeletTransform">RandomShapeletTransform</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sktime.transformers.shapelets.RandomShapeletTransform.fit_transform">
+<code class="descname">fit_transform</code><span class="sig-paren">(</span><em>X</em>, <em>y=None</em>, <em>**fit_params</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/shapelets.html#RandomShapeletTransform.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.shapelets.RandomShapeletTransform.fit_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits and transforms a given input X and y</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>pandas.DataFrame the input data to transform</em>) – </li>
+<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em> or </em><em>array like of class values corresponding to the indices in X</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Xt</strong> – The transformed pandas DataFrame.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas DataFrame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sktime.transformers.shapelets.RandomShapeletTransform.get_shapelets">
+<code class="descname">get_shapelets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/shapelets.html#RandomShapeletTransform.get_shapelets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.shapelets.RandomShapeletTransform.get_shapelets" title="Permalink to this definition">¶</a></dt>
+<dd><p>An accessor method to return the extracted shapelets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>shapelets</strong></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">a list of Shapelet objects</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sktime.transformers.shapelets.RandomShapeletTransform.remove_self_similar">
+<em class="property">static </em><code class="descname">remove_self_similar</code><span class="sig-paren">(</span><em>shapelet_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/shapelets.html#RandomShapeletTransform.remove_self_similar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.shapelets.RandomShapeletTransform.remove_self_similar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove self-similar shapelets from an input list. Note: this method assumes
+that shapelets are pre-sorted in descending order of quality (i.e. if two candidates
+are self-similar, the one with the later index will be removed)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>shapelet_list</strong> (<em>list of Shapelet objects</em>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>shapelet_list</strong></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of Shapelet objects</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sktime.transformers.shapelets.RandomShapeletTransform.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>X</em>, <em>y=None</em>, <em>**transform_params</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/shapelets.html#RandomShapeletTransform.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.shapelets.RandomShapeletTransform.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms X according to the extracted shapelets (self.shapelets)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>pandas DataFrame</em>) – The input dataframe to transform</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>output</strong> – The transformed dataframe in tabular format.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sktime.transformers.shapelets.RandomShapeletTransform.zscore">
+<em class="property">static </em><code class="descname">zscore</code><span class="sig-paren">(</span><em>a</em>, <em>axis=0</em>, <em>ddof=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/shapelets.html#RandomShapeletTransform.zscore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.shapelets.RandomShapeletTransform.zscore" title="Permalink to this definition">¶</a></dt>
+<dd><p>A static method to return the normalised version of series.  This mirrors the scipy implementation
+with a small difference - rather than allowing /0, the function returns output = np.zeroes(len(input)).
+This is to allow for sensible processing of candidate shapelets/comparison subseries that are a straight
+line. Original version: <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.zscore.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.zscore.html</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>array_like</em>) – An array like object containing the sample data.</li>
+<li><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a><em>, </em><em>optional</em>) – Axis along which to operate. Default is 0. If None, compute over the whole array a.</li>
+<li><strong>ddof</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em>) – Degrees of freedom correction in the calculation of the standard deviation. Default is 0.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>zscore</strong> – The z-scores, standardized by mean and standard deviation of input array a.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">array_like</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sktime.transformers.shapelets.Shapelet">
+<em class="property">class </em><code class="descclassname">sktime.transformers.shapelets.</code><code class="descname">Shapelet</code><span class="sig-paren">(</span><em>series_id</em>, <em>start_pos</em>, <em>length</em>, <em>info_gain</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/shapelets.html#Shapelet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.shapelets.Shapelet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A simple class to model a Shapelet with associated information</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>series_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – The index of the series within the data (X) that was passed to fit.</li>
+<li><strong>start_pos</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – The starting position of the shapelet within the original series</li>
+<li><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – The length of the shapelet</li>
+<li><strong>info_gain</strong> (<em>flaot</em>) – The calculated information gain of this shapelet</li>
+<li><strong>data</strong> (<em>array-like</em>) – The (z-normalised) data of this shapelet</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sktime.highlevel.html" class="btn btn-neutral float-right" title="sktime.highlevel module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="sktime.transformers.series_to_tabular.html" class="btn btn-neutral float-left" title="sktime.transformers.series_to_tabular module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

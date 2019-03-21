@@ -1,0 +1,7 @@
+sktime.classifiers.example\_classifiers module
+==============================================
+
+.. automodule:: sktime.classifiers.example_classifiers
+    :members:
+    :undoc-members:
+    :show-inheritance:

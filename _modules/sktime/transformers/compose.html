@@ -1,0 +1,477 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sktime.transformers.compose &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../autogen/sktime.html">sktime package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extension.html">Extension Guidelines</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>sktime.transformers.compose</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for sktime.transformers.compose</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Meta Transformers module</span>
+
+<span class="sd">This module has meta-transformers that is build using the pre-existing</span>
+<span class="sd">transformers as building blocks.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">BaseTransformer</span>
+<span class="kn">from</span> <span class="nn">..utils.validation</span> <span class="k">import</span> <span class="n">check_ts_array</span>
+<span class="kn">from</span> <span class="nn">..utils.transformations</span> <span class="k">import</span> <span class="n">tabularize</span>
+<span class="kn">from</span> <span class="nn">sklearn.utils.validation</span> <span class="k">import</span> <span class="n">check_is_fitted</span>
+<span class="kn">from</span> <span class="nn">sklearn.compose</span> <span class="k">import</span> <span class="n">ColumnTransformer</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">sparse</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TSColumnTransformer&#39;</span><span class="p">,</span> <span class="s1">&#39;RowwiseTransformer&#39;</span><span class="p">,</span> <span class="s1">&#39;Tabularizer&#39;</span><span class="p">,</span> <span class="s1">&#39;Tabulariser&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="TSColumnTransformer"><a class="viewcode-back" href="../../../autogen/sktime.transformers.compose.html#sktime.transformers.compose.TSColumnTransformer">[docs]</a><span class="k">class</span> <span class="nc">TSColumnTransformer</span><span class="p">(</span><span class="n">ColumnTransformer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Applies transformers to columns of an array or pandas DataFrame. Simply takes the column transformer from sklearn</span>
+<span class="sd">    and adds capability to handle pandas dataframe.</span>
+
+<span class="sd">    This estimator allows different columns or column subsets of the input</span>
+<span class="sd">    to be transformed separately and the features generated by each transformer</span>
+<span class="sd">    will be concatenated to form a single feature space.</span>
+<span class="sd">    This is useful for heterogeneous or columnar data, to combine several</span>
+<span class="sd">    feature extraction mechanisms or transformations into a single transformer.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    transformers : list of tuples</span>
+<span class="sd">        List of (name, transformer, column(s)) tuples specifying the</span>
+<span class="sd">        transformer objects to be applied to subsets of the data.</span>
+<span class="sd">        name : string</span>
+<span class="sd">            Like in Pipeline and FeatureUnion, this allows the transformer and</span>
+<span class="sd">            its parameters to be set using ``set_params`` and searched in grid</span>
+<span class="sd">            search.</span>
+<span class="sd">        transformer : estimator or {&#39;passthrough&#39;, &#39;drop&#39;}</span>
+<span class="sd">            Estimator must support `fit` and `transform`. Special-cased</span>
+<span class="sd">            strings &#39;drop&#39; and &#39;passthrough&#39; are accepted as well, to</span>
+<span class="sd">            indicate to drop the columns or to pass them through untransformed,</span>
+<span class="sd">            respectively.</span>
+<span class="sd">        column(s) : string or int, array-like of string or int, slice, \</span>
+<span class="sd">boolean mask array or callable</span>
+<span class="sd">            Indexes the data on its second axis. Integers are interpreted as</span>
+<span class="sd">            positional columns, while strings can reference DataFrame columns</span>
+<span class="sd">            by name.  A scalar string or int should be used where</span>
+<span class="sd">            ``transformer`` expects X to be a 1d array-like (vector),</span>
+<span class="sd">            otherwise a 2d array will be passed to the transformer.</span>
+<span class="sd">            A callable is passed the input data `X` and can return any of the</span>
+<span class="sd">            above.</span>
+<span class="sd">    remainder : {&#39;drop&#39;, &#39;passthrough&#39;} or estimator, default &#39;drop&#39;</span>
+<span class="sd">        By default, only the specified columns in `transformers` are</span>
+<span class="sd">        transformed and combined in the output, and the non-specified</span>
+<span class="sd">        columns are dropped. (default of ``&#39;drop&#39;``).</span>
+<span class="sd">        By specifying ``remainder=&#39;passthrough&#39;``, all remaining columns that</span>
+<span class="sd">        were not specified in `transformers` will be automatically passed</span>
+<span class="sd">        through. This subset of columns is concatenated with the output of</span>
+<span class="sd">        the transformers.</span>
+<span class="sd">        By setting ``remainder`` to be an estimator, the remaining</span>
+<span class="sd">        non-specified columns will use the ``remainder`` estimator. The</span>
+<span class="sd">        estimator must support `fit` and `transform`.</span>
+<span class="sd">    sparse_threshold : float, default = 0.3</span>
+<span class="sd">        If the output of the different transfromers contains sparse matrices,</span>
+<span class="sd">        these will be stacked as a sparse matrix if the overall density is</span>
+<span class="sd">        lower than this value. Use ``sparse_threshold=0`` to always return</span>
+<span class="sd">        dense.  When the transformed output consists of all dense data, the</span>
+<span class="sd">        stacked result will be dense, and this keyword will be ignored.</span>
+<span class="sd">    n_jobs : int or None, optional (default=None)</span>
+<span class="sd">        Number of jobs to run in parallel.</span>
+<span class="sd">        ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.</span>
+<span class="sd">        ``-1`` means using all processors. See :term:`Glossary &lt;n_jobs&gt;`</span>
+<span class="sd">        for more details.</span>
+<span class="sd">    transformer_weights : dict, optional</span>
+<span class="sd">        Multiplicative weights for features per transformer. The output of the</span>
+<span class="sd">        transformer is multiplied by these weights. Keys are transformer names,</span>
+<span class="sd">        values the weights.</span>
+<span class="sd">    preserve_dataframe : boolean</span>
+<span class="sd">        If True, pandas dataframe is returned.</span>
+<span class="sd">        If False, numpy array is returned.</span>
+
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    transformers_ : list</span>
+<span class="sd">        The collection of fitted transformers as tuples of</span>
+<span class="sd">        (name, fitted_transformer, column). `fitted_transformer` can be an</span>
+<span class="sd">        estimator, &#39;drop&#39;, or &#39;passthrough&#39;. In case there were no columns</span>
+<span class="sd">        selected, this will be the unfitted transformer.</span>
+<span class="sd">        If there are remaining columns, the final element is a tuple of the</span>
+<span class="sd">        form:</span>
+<span class="sd">        (&#39;remainder&#39;, transformer, remaining_columns) corresponding to the</span>
+<span class="sd">        ``remainder`` parameter. If there are remaining columns, then</span>
+<span class="sd">        ``len(transformers_)==len(transformers)+1``, otherwise</span>
+<span class="sd">        ``len(transformers_)==len(transformers)``.</span>
+<span class="sd">    named_transformers_ : Bunch object, a dictionary with attribute access</span>
+<span class="sd">        Read-only attribute to access any transformer by given name.</span>
+<span class="sd">        Keys are transformer names and values are the fitted transformer</span>
+<span class="sd">        objects.</span>
+<span class="sd">    sparse_output_ : boolean</span>
+<span class="sd">        Boolean flag indicating wether the output of ``transform`` is a</span>
+<span class="sd">        sparse matrix or a dense numpy array, which depends on the output</span>
+<span class="sd">        of the individual transformers and the `sparse_threshold` keyword.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">transformers</span><span class="p">,</span>
+        <span class="n">remainder</span><span class="o">=</span><span class="s2">&quot;drop&quot;</span><span class="p">,</span>
+        <span class="n">sparse_threshold</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">transformer_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">preserve_dataframe</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">preserve_dataframe</span> <span class="o">=</span> <span class="n">preserve_dataframe</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TSColumnTransformer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">transformers</span><span class="o">=</span><span class="n">transformers</span><span class="p">,</span>
+            <span class="n">remainder</span><span class="o">=</span><span class="n">remainder</span><span class="p">,</span>
+            <span class="n">sparse_threshold</span><span class="o">=</span><span class="n">sparse_threshold</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">transformer_weights</span><span class="o">=</span><span class="n">transformer_weights</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_hstack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Xs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stacks X horizontally.</span>
+
+<span class="sd">        Supports input types (X): list of numpy arrays, sparse arrays and DataFrames</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">Xs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sparse_output_</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sparse</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">Xs</span><span class="p">)</span><span class="o">.</span><span class="n">tocsr</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preserve_dataframe</span> <span class="ow">and</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="ow">in</span> <span class="n">types</span> <span class="ow">or</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="ow">in</span> <span class="n">types</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">Xs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;columns&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">Xs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_validate_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensure that the output of each transformer is 2D. Otherwise</span>
+<span class="sd">        hstack can raise an error or produce incorrect results.</span>
+
+<span class="sd">        Output can also be a pd.Series which is actually a 1D</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iter</span><span class="p">(</span><span class="n">fitted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                      <span class="n">replace_strings</span><span class="o">=</span><span class="kc">True</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">Xs</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">Xs</span><span class="p">,</span> <span class="s1">&#39;ndim&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Xs</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;The output of the &#39;</span><span class="si">{0}</span><span class="s2">&#39; transformer should be 2D (scipy &quot;</span> <span class="s2">&quot;matrix, array, or pandas DataFrame).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="RowwiseTransformer"><a class="viewcode-back" href="../../../autogen/sktime.transformers.compose.html#sktime.transformers.compose.RowwiseTransformer">[docs]</a><span class="k">class</span> <span class="nc">RowwiseTransformer</span><span class="p">(</span><span class="n">BaseTransformer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A convenience wrapper for row-wise transformers to apply transformation to all rows.</span>
+
+<span class="sd">    This estimator allows to create a transformer that works on all rows from a passed transformer that works on a</span>
+<span class="sd">    single row. This is useful for applying transformers to the time-series in the rows.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    transformer : estimator</span>
+<span class="sd">        An estimator that can work on a row (i.e. a univariate time-series in form of a numpy array or pandas Series.</span>
+<span class="sd">        must support `fit` and `transform`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transformer</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transformer</span> <span class="o">=</span> <span class="n">transformer</span>
+
+<div class="viewcode-block" id="RowwiseTransformer.fit"><a class="viewcode-back" href="../../../autogen/sktime.transformers.compose.html#sktime.transformers.compose.RowwiseTransformer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Empty fit function that does nothing.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : 1D array-like, pandas Series, shape (n_samples, 1)</span>
+<span class="sd">            The training input samples. Shoould not be a DataFrame.</span>
+<span class="sd">        y : None, as it is transformer on X</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">            Returns self.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check the validity of input</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">check_ts_array</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c1"># fitting - this transformer needs no fitting</span>
+        <span class="k">pass</span>
+
+        <span class="c1"># let the model know that it is fitted</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted_</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># `fit` should always return `self`</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="RowwiseTransformer.transform"><a class="viewcode-back" href="../../../autogen/sktime.transformers.compose.html#sktime.transformers.compose.RowwiseTransformer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calls the fit_transfor() of the per-row transformer repeatedly</span>
+<span class="sd">        on each row.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : 1D array-like, pandas Series, shape (n_samples, 1)</span>
+<span class="sd">            The training input samples. Shoould not be a DataFrame.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        T : 1D array-like, pandas Series, shape (n_samples, ...)</span>
+<span class="sd">            The transformed data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check the validity of input</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">check_ts_array</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;is_fitted_&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Works on single column, but on multiple columns only if columns have equal-length series.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Xt</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transformer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">)</span>
+
+        <span class="c1"># Otherwise call apply on each column separately.</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;arrays must all be same length&#39;</span><span class="p">:</span>
+                <span class="n">Xt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transformer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">items</span><span class="p">()],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span>
+
+        <span class="k">return</span> <span class="n">Xt</span></div></div>
+
+
+<div class="viewcode-block" id="Tabularizer"><a class="viewcode-back" href="../../../autogen/sktime.transformers.compose.html#sktime.transformers.compose.Tabularizer">[docs]</a><span class="k">class</span> <span class="nc">Tabularizer</span><span class="p">(</span><span class="n">BaseTransformer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A transformer that turns time-series/panel data into tabular data.</span>
+
+<span class="sd">    This estimator converts nested pandas dataframe containing time-series/panel data with numpy arrays or pandas Series in</span>
+<span class="sd">    dataframe cells into a tabular pandas dataframe with only primitives in cells. This is useful for transforming</span>
+<span class="sd">    time-series/panel data into a format that is accepted by standard supervised learning algorithms (as in sklearn).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    param check_input: bool, optional (default=True)</span>
+<span class="sd">        When set to ``True``, inputs will be validated, otherwise inputs are assumed to be valid</span>
+<span class="sd">        and no checks are performed. Use with caution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_input</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_input</span> <span class="o">=</span> <span class="n">check_input</span>
+
+<div class="viewcode-block" id="Tabularizer.fit"><a class="viewcode-back" href="../../../autogen/sktime.transformers.compose.html#sktime.transformers.compose.Tabularizer.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Empty fit function that does nothing. Kept here for consistency.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : 1D array-like, pandas Series, shape (n_samples, 1)</span>
+<span class="sd">            The training input samples. Shoould not be a DataFrame.</span>
+<span class="sd">        y : None, as it is transformer on X</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : object</span>
+<span class="sd">            Returns self.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check the validity of input</span>
+        <span class="c1"># TODO check if for each column, all rows have equal-index series</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_input</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">check_ts_array</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c1"># let the model know that it is fitted</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted_</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># `fit` should always return `self`</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Tabularizer.transform"><a class="viewcode-back" href="../../../autogen/sktime.transformers.compose.html#sktime.transformers.compose.Tabularizer.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transform nested pandas dataframe into tabular pandas dataframe.</span>
+<span class="sd">        param X : pandas dataframe</span>
+<span class="sd">            Nested dataframe with pandas series or numpy arrays in cells.</span>
+
+<span class="sd">        return : pandas dataframe</span>
+<span class="sd">            Tabular dataframe with only primitives in cells.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check the validity of input</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;is_fitted_&#39;</span><span class="p">)</span>
+
+        <span class="c1"># TODO check if for each column, all rows have equal-index series</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_input</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">check_ts_array</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="n">Xt</span> <span class="o">=</span> <span class="n">tabularize</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Xt</span></div></div>
+
+
+<span class="n">Tabulariser</span> <span class="o">=</span> <span class="n">Tabularizer</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

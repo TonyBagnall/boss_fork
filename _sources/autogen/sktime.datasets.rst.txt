@@ -1,0 +1,15 @@
+sktime.datasets package
+=======================
+
+.. automodule:: sktime.datasets
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   sktime.datasets.base
+

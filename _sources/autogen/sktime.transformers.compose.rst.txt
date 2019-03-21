@@ -1,0 +1,7 @@
+sktime.transformers.compose module
+==================================
+
+.. automodule:: sktime.transformers.compose
+    :members:
+    :undoc-members:
+    :show-inheritance:

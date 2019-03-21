@@ -1,0 +1,345 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sktime.transformers.series_to_series &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../autogen/sktime.html">sktime package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extension.html">Extension Guidelines</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>sktime.transformers.series_to_series</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for sktime.transformers.series_to_series</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">sklearn.utils.validation</span> <span class="k">import</span> <span class="n">check_is_fitted</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">..utils.validation</span> <span class="k">import</span> <span class="n">check_equal_index</span>
+<span class="kn">from</span> <span class="nn">..utils.transformations</span> <span class="k">import</span> <span class="n">tabularize</span><span class="p">,</span> <span class="n">concat_nested_arrays</span>
+<span class="kn">from</span> <span class="nn">..utils.time_series</span> <span class="k">import</span> <span class="n">rand_intervals_rand_n</span><span class="p">,</span> <span class="n">rand_intervals_fixed_n</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">BaseTransformer</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;RandomIntervalSegmenter&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="RandomIntervalSegmenter"><a class="viewcode-back" href="../../../autogen/sktime.transformers.series_to_series.html#sktime.transformers.series_to_series.RandomIntervalSegmenter">[docs]</a><span class="k">class</span> <span class="nc">RandomIntervalSegmenter</span><span class="p">(</span><span class="n">BaseTransformer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transformer that segments time-series into random intervals.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    param n_intervals: str or int</span>
+<span class="sd">        Number of intervals to generate.</span>
+<span class="sd">        - If &quot;sqrt&quot;, sqrt of length of time-series is used.</span>
+<span class="sd">        - If &quot;random&quot;, random number of intervals is generated.</span>
+<span class="sd">        - If int, n_intervals intervals are generated.</span>
+<span class="sd">        Default is &quot;sqrt&quot;.</span>
+
+<span class="sd">    param random_state: : int, RandomState instance or None, optional (default=None)</span>
+<span class="sd">        If int, random_state is the seed used by the random number generator;</span>
+<span class="sd">        If RandomState instance, random_state is the random number generator;</span>
+<span class="sd">        If None, the random number generator is the RandomState instance used</span>
+<span class="sd">        by `np.random`.</span>
+
+<span class="sd">    param check_input: bool, optional (default=True)</span>
+<span class="sd">        When set to ``True``, inputs will be validated, otherwise inputs are assumed to be valid</span>
+<span class="sd">        and no checks are performed. Use with caution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_intervals</span><span class="o">=</span><span class="s1">&#39;sqrt&#39;</span><span class="p">,</span> <span class="n">min_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">check_input</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_indexes_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of time-series indexes of each column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_input</span> <span class="o">=</span> <span class="n">check_input</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intervals_</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_shape_</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_intervals</span> <span class="o">=</span> <span class="n">n_intervals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns_</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">min_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min_length</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min_length</span> <span class="o">=</span> <span class="n">min_length</span>
+
+        <span class="k">if</span> <span class="n">n_intervals</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;sqrt&#39;</span><span class="p">,</span> <span class="s1">&#39;random&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_intervals</span> <span class="o">=</span> <span class="n">n_intervals</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">n_intervals</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">n_intervals</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Number of intervals must be positive&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_intervals</span> <span class="o">=</span> <span class="n">n_intervals</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Number of intervals must be either &quot;random&quot;, &quot;sqrt&quot; or positive integer, &#39;</span>
+                             <span class="n">f</span><span class="s1">&#39;but found {type(n_intervals)}&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RandomIntervalSegmenter.fit"><a class="viewcode-back" href="../../../autogen/sktime.transformers.series_to_series.html#sktime.transformers.series_to_series.RandomIntervalSegmenter.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit transformer, generating random interval indices.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : pandas DataFrame of shape [n_samples, n_features]</span>
+<span class="sd">            Input data</span>
+<span class="sd">        y : pandas Series, shape (n_samples, ...), optional</span>
+<span class="sd">            Targets for supervised learning.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : RandomIntervalSegmenter</span>
+<span class="sd">            This estimator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_input</span><span class="p">:</span>
+            <span class="c1"># TODO check input is series column, not column of primitives</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Cast into 2d dataframe</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_shape_</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="c1"># Retrieve time-series indexes from each column.</span>
+        <span class="c1"># TODO generalise to columns with series of unequal length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_indexes_</span> <span class="o">=</span> <span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="p">],</span> <span class="s1">&#39;index&#39;</span><span class="p">)</span>
+                               <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_shape_</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+
+        <span class="c1"># Compute random intervals for each column.</span>
+        <span class="c1"># TODO if multiple columns are passed, introduce option to compute one set of shared intervals,</span>
+        <span class="c1">#  or use ColumnTransformer?</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_intervals</span> <span class="o">==</span> <span class="s1">&#39;random&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intervals_</span> <span class="o">=</span> <span class="p">[</span><span class="n">rand_intervals_rand_n</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_indexes_</span><span class="p">[</span><span class="n">c</span><span class="p">],</span>
+                                                     <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+                               <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_shape_</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intervals_</span> <span class="o">=</span> <span class="p">[</span><span class="n">rand_intervals_fixed_n</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_indexes_</span><span class="p">[</span><span class="n">c</span><span class="p">],</span>
+                                                      <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_intervals</span><span class="p">,</span>
+                                                      <span class="n">min_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_length</span><span class="p">,</span>
+                                                      <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+                               <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_shape_</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="RandomIntervalSegmenter.transform"><a class="viewcode-back" href="../../../autogen/sktime.transformers.series_to_series.html#sktime.transformers.series_to_series.RandomIntervalSegmenter.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transform X, segments time-series in each column into random intervals using interval indices generated</span>
+<span class="sd">        during `fit`.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : nested pandas DataFrame of shape [n_samples, n_features]</span>
+<span class="sd">            Nested dataframe with time-series in cells.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Xt : pandas DataFrame</span>
+<span class="sd">          Transformed pandas DataFrame with same number of rows and one column for each generated interval.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check is fit had been called</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;intervals_&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Cast into 2d dataframe</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c1"># Check inputs.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_input</span><span class="p">:</span>
+            <span class="c1"># Check that the input is of the same shape as the one passed</span>
+            <span class="c1"># during fit.</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_shape_</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Number of columns of input is different from what was seen&#39;</span>
+                                 <span class="s1">&#39;in `fit`&#39;</span><span class="p">)</span>
+            <span class="c1"># Input validation</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">fit_idx</span><span class="p">,</span> <span class="n">trans_idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">trans_idx</span><span class="p">,</span> <span class="n">fit_idx</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">check_equal_index</span><span class="p">(</span><span class="n">X</span><span class="p">),</span>
+                                                                                         <span class="bp">self</span><span class="o">.</span><span class="n">input_indexes_</span><span class="p">)]):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Indexes of input time-series are different from what was seen in `fit`&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Segment into intervals.</span>
+        <span class="n">intervals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns_</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="c1"># Tabularize each column assuming series have equal indexes in any given column.</span>
+            <span class="c1"># TODO generalise to non-equal-index cases</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">tabularize</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">return_array</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals_</span><span class="p">[</span><span class="n">c</span><span class="p">]:</span>
+                <span class="n">interval</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[:,</span> <span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+                <span class="n">intervals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">columns_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{colname}</span><span class="s1">_</span><span class="si">{start}</span><span class="s1">_</span><span class="si">{end}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Return nested pandas Series or DataFrame.</span>
+        <span class="n">Xt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">concat_nested_arrays</span><span class="p">(</span><span class="n">intervals</span><span class="p">,</span> <span class="n">return_arrays</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="n">Xt</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns_</span>
+        <span class="k">return</span> <span class="n">Xt</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

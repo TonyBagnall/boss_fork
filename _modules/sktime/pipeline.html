@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sktime.pipeline &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autogen/sktime.html">sktime package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../extension.html">Extension Guidelines</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>sktime.pipeline</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for sktime.pipeline</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="k">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="k">import</span> <span class="n">FeatureUnion</span>
+<span class="kn">from</span> <span class="nn">sklearn.utils._joblib</span> <span class="k">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">sparse</span>
+
+
+<div class="viewcode-block" id="TSPipeline"><a class="viewcode-back" href="../../autogen/sktime.pipeline.html#sktime.pipeline.TSPipeline">[docs]</a><span class="k">class</span> <span class="nc">TSPipeline</span><span class="p">(</span><span class="n">Pipeline</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pipeline of transforms with a final estimator.</span>
+
+<span class="sd">    Sequentially apply a list of transforms and a final estimator.</span>
+<span class="sd">    Intermediate steps of the pipeline must be &#39;transforms&#39;, that is, they must implement fit and transform methods.</span>
+<span class="sd">    The final estimator only needs to implement fit.</span>
+<span class="sd">    The transformers in the pipeline can be cached using ``memory`` argument.</span>
+<span class="sd">    The purpose of the pipeline is to assemble several steps that can be</span>
+<span class="sd">    cross-validated together while setting different parameters.</span>
+<span class="sd">    For this, it enables setting parameters of the various steps using their</span>
+<span class="sd">    names and the parameter name separated by a &#39;__&#39;, as in the example below.</span>
+<span class="sd">    A step&#39;s estimator may be replaced entirely by setting the parameter</span>
+<span class="sd">    with its name to another estimator, or a transformer removed by setting</span>
+<span class="sd">    to None.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    steps : list</span>
+<span class="sd">        List of (name, transform) tuples (implementing fit/transform) that are</span>
+<span class="sd">        chained, in the order in which they are chained, with the last object</span>
+<span class="sd">        an estimator.</span>
+<span class="sd">    memory : None, str or object with the joblib.Memory interface, optional</span>
+<span class="sd">        Used to cache the fitted transformers of the pipeline. By default,</span>
+<span class="sd">        no caching is performed. If a string is given, it is the path to</span>
+<span class="sd">        the caching directory. Enabling caching triggers a clone of</span>
+<span class="sd">        the transformers before fitting. Therefore, the transformer</span>
+<span class="sd">        instance given to the pipeline cannot be inspected</span>
+<span class="sd">        directly. Use the attribute ``named_steps`` or ``steps`` to</span>
+<span class="sd">        inspect estimators within the pipeline. Caching the</span>
+<span class="sd">        transformers is advantageous when fitting is time consuming.</span>
+<span class="sd">    random_state: : int, RandomState instance or None, optional (default=None)</span>
+<span class="sd">        Passed random state is propagated to all steps of the pipeline that have a random state attribute.</span>
+<span class="sd">        - If int, random_state is the seed used by the random number generator;</span>
+<span class="sd">        - If RandomState instance, random_state is the random number generator;</span>
+<span class="sd">        - If None, the random number generator is the RandomState instance used</span>
+<span class="sd">        by `np.random`.</span>
+<span class="sd">    check_input: boolean, optional (default=True)</span>
+<span class="sd">        When set to ``True``, inputs will be validated, otherwise inputs are assumed to be valid</span>
+<span class="sd">        and no checks are performed in any step of the pipeline. Use with caution.</span>
+
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    named_steps : bunch object, a dictionary with attribute access</span>
+<span class="sd">        Read-only attribute to access any step parameter by user given name.</span>
+<span class="sd">        Keys are step names and values are steps parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">memory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">check_input</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TSPipeline</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">memory</span><span class="o">=</span><span class="n">memory</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_input</span> <span class="o">=</span> <span class="n">check_input</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">random_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span>
+
+    <span class="nd">@random_state</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">random_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+
+        <span class="c1"># If random state is set for entire pipeline, set random state for all random components</span>
+        <span class="k">if</span> <span class="n">random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;random_state&#39;</span><span class="p">):</span>
+                    <span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s1">&#39;random_state&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">})</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">check_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_input</span>
+
+    <span class="nd">@check_input</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">check_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_input</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_input</span> <span class="o">=</span> <span class="n">check_input</span>
+
+        <span class="c1"># If check_input is set for entire pipeline, set check input for all components</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">check_input</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;check_input&#39;</span><span class="p">):</span>
+                    <span class="n">step</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s1">&#39;check_input&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_input</span><span class="p">})</span></div>
+
+
+<span class="k">def</span> <span class="nf">_fit_one_transformer</span><span class="p">(</span><span class="n">transformer</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">transformer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_transform_one</span><span class="p">(</span><span class="n">transformer</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">):</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">transformer</span><span class="o">.</span><span class="n">transform</span><span class="p">)</span>
+    <span class="c1"># if we have a weight for this transformer, multiply output</span>
+    <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">res</span>
+    <span class="k">return</span> <span class="n">res</span> <span class="o">*</span> <span class="n">weight</span>
+
+
+<span class="k">def</span> <span class="nf">_fit_transform_one</span><span class="p">(</span><span class="n">transformer</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">transformer</span><span class="p">,</span> <span class="s1">&#39;fit_transform&#39;</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">transformer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">transformer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">)</span><span class="o">.</span><span class="n">transform</span><span class="p">)</span>
+    <span class="c1"># if we have a weight for this transformer, multiply output</span>
+    <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">res</span><span class="p">,</span> <span class="n">transformer</span>
+    <span class="k">return</span> <span class="n">res</span> <span class="o">*</span> <span class="n">weight</span><span class="p">,</span> <span class="n">transformer</span>
+
+
+<div class="viewcode-block" id="TSFeatureUnion"><a class="viewcode-back" href="../../autogen/sktime.pipeline.html#sktime.pipeline.TSFeatureUnion">[docs]</a><span class="k">class</span> <span class="nc">TSFeatureUnion</span><span class="p">(</span><span class="n">FeatureUnion</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Concatenates results of multiple transformer objects.</span>
+<span class="sd">        This estimator applies a list of transformer objects in parallel to the</span>
+<span class="sd">        input data, then concatenates the results. This is useful to combine</span>
+<span class="sd">        several feature extraction mechanisms into a single transformer.</span>
+<span class="sd">        Parameters of the transformers may be set using its name and the parameter</span>
+<span class="sd">        name separated by a &#39;__&#39;. A transformer may be replaced entirely by</span>
+<span class="sd">        setting the parameter with its name to another transformer,</span>
+<span class="sd">        or removed by setting to &#39;drop&#39; or ``None``.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        transformer_list : list of (string, transformer) tuples</span>
+<span class="sd">            List of transformer objects to be applied to the data. The first</span>
+<span class="sd">            half of each tuple is the name of the transformer.</span>
+<span class="sd">        n_jobs : int or None, optional (default=None)</span>
+<span class="sd">            Number of jobs to run in parallel.</span>
+<span class="sd">            ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.</span>
+<span class="sd">            ``-1`` means using all processors. See :term:`Glossary &lt;n_jobs&gt;`</span>
+<span class="sd">            for more details.</span>
+<span class="sd">        transformer_weights : dict, optional</span>
+<span class="sd">            Multiplicative weights for features per transformer.</span>
+<span class="sd">            Keys are transformer names, values the weights.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">transformer_list</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">transformer_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">preserve_dataframe</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preserve_dataframe</span> <span class="o">=</span> <span class="n">preserve_dataframe</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TSFeatureUnion</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">transformer_list</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">transformer_weights</span><span class="o">=</span><span class="n">transformer_weights</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="TSFeatureUnion.fit_transform"><a class="viewcode-back" href="../../autogen/sktime.pipeline.html#sktime.pipeline.TSFeatureUnion.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit all transformers, transform the data and concatenate results.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : pandas DataFrame</span>
+<span class="sd">            Input data to be transformed.</span>
+<span class="sd">        y : pandas Series, shape (n_samples, ...), optional</span>
+<span class="sd">            Targets for supervised learning.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Xt : pandas DataFrame</span>
+<span class="sd">            hstack of results of transformers. sum_n_components is the</span>
+<span class="sd">            sum of n_components (output dimension) over transformers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_transformers</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">_fit_transform_one</span><span class="p">)(</span><span class="n">trans</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weight</span><span class="p">,</span>
+                                        <span class="o">**</span><span class="n">fit_params</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">trans</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iter</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+            <span class="c1"># All transformers are None</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="n">Xs</span><span class="p">,</span> <span class="n">transformers</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">result</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_transformer_list</span><span class="p">(</span><span class="n">transformers</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hstack</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">Xs</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TSFeatureUnion.transform"><a class="viewcode-back" href="../../autogen/sktime.pipeline.html#sktime.pipeline.TSFeatureUnion.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transform X separately by each transformer, concatenate results.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : pandas DataFrame</span>
+<span class="sd">            Input data to be transformed.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Xt : pandas DataFrame</span>
+<span class="sd">            hstack of results of transformers. sum_n_components is the</span>
+<span class="sd">            sum of n_components (output dimension) over transformers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Xs</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">_transform_one</span><span class="p">)(</span><span class="n">trans</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">weight</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">trans</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iter</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Xs</span><span class="p">:</span>
+            <span class="c1"># All transformers are None</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hstack</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">Xs</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">_hstack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Xs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stacks X horizontally.</span>
+<span class="sd">        Supports input types (X): list of</span>
+<span class="sd">            numpy arrays, sparse arrays and DataFrames</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">sparse</span><span class="o">.</span><span class="n">issparse</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">Xs</span><span class="p">):</span>
+            <span class="n">Xs</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">Xs</span><span class="p">)</span><span class="o">.</span><span class="n">tocsr</span><span class="p">()</span>
+
+        <span class="n">types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="k">for</span> <span class="n">X</span> <span class="ow">in</span> <span class="n">Xs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preserve_dataframe</span> <span class="ow">and</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span> <span class="ow">in</span> <span class="n">types</span> <span class="ow">or</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="ow">in</span> <span class="n">types</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">Xs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">Xs</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

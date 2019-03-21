@@ -1,0 +1,402 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sktime.datasets.base module &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sktime.regressors package" href="sktime.regressors.html" />
+    <link rel="prev" title="sktime.datasets package" href="sktime.datasets.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="sktime.html">sktime package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="sktime.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="sktime.classifiers.html">sktime.classifiers package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="sktime.datasets.html">sktime.datasets package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="sktime.datasets.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="sktime.regressors.html">sktime.regressors package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sktime.transformers.html">sktime.transformers package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sktime.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extension.html">Extension Guidelines</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="sktime.html">sktime package</a> &raquo;</li>
+        
+          <li><a href="sktime.datasets.html">sktime.datasets package</a> &raquo;</li>
+        
+      <li>sktime.datasets.base module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autogen/sktime.datasets.base.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-sktime.datasets.base">
+<span id="sktime-datasets-base-module"></span><h1>sktime.datasets.base module<a class="headerlink" href="#module-sktime.datasets.base" title="Permalink to this headline">¶</a></h1>
+<p>Utilities for loading toy datasets for testing</p>
+<dl class="function">
+<dt id="sktime.datasets.base.load_arrow_head_dataframe">
+<code class="descclassname">sktime.datasets.base.</code><code class="descname">load_arrow_head_dataframe</code><span class="sig-paren">(</span><em>split='TRAIN'</em>, <em>return_X_y=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/datasets/base.html#load_arrow_head_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.datasets.base.load_arrow_head_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the ArrowHead time series classification problem and returns X and y</p>
+<p>Dimensionality:     univariate
+Series length:      251
+Train cases:        36
+Test cases:         175
+Number of classes:  3</p>
+<p>The arrowhead data consists of outlines of the images of arrowheads. The shapes of the
+projectile points are converted into a time series using the angle-based method. The
+classification of projectile points is an important topic in anthropology. The classes
+are based on shape distinctions such as the presence and location of a notch in the
+arrow. The problem in the repository is a length normalised version of that used in
+Ye09shapelets. The three classes are called “Avonlea”, “Clovis” and “Mix”.”</p>
+<p>Dataset details: <a class="reference external" href="http://timeseriesclassification.com/description.php?Dataset=ArrowHead">http://timeseriesclassification.com/description.php?Dataset=ArrowHead</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>split</strong> (<em>string</em><em> (</em><em>either &quot;TRAIN&quot;</em><em> or </em><em>&quot;TEST&quot;</em><em>, </em><em>default = 'TRAIN'</em><em>)</em>) – Whether to load the default train or test partition of the problem</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>X</strong> (<em>pandas DataFrame with m rows and c columns</em>) – The time series data for the problem with m cases and c dimensions</li>
+<li><strong>y</strong> (<em>numpy array</em>) – The class labels for each case in X</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sktime.datasets.base.load_gunpoint">
+<code class="descclassname">sktime.datasets.base.</code><code class="descname">load_gunpoint</code><span class="sig-paren">(</span><em>split='TRAIN'</em>, <em>return_X_y=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/datasets/base.html#load_gunpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.datasets.base.load_gunpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the gunpoint dataset as a pandas DataFrame</p>
+<p>This dataset involves one female actor and one male actor making a
+motion with their hand. The two classes are: Gun-Draw and Point:
+For Gun-Draw the actors have their hands by their sides. They draw
+a replicate gun from a hip-mounted holster, point it at a target
+for approximately one second, then return the gun to the holster,
+and their hands to their sides. For Point the actors have their gun
+by their sides. They point with their index fingers to a target for
+approximately one second, and then return their hands to their
+sides. For both classes, we tracked the centroid of the actor’s
+right hands in both X- and Y-axes, which appear to be highly
+correlated. The data in the archive is just the X-axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>split</strong> (<em>string</em><em> (</em><em>either &quot;TRAIN&quot;</em><em> or </em><em>&quot;TEST&quot;</em>) – takes the default value “TRAIN”. Used to specify the appropriate
+part of the dataset to be loaded.</li>
+<li><strong>return_X_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – If True, returns the features and target separately, each as pd.Series
+If False, returns both features and target in one DataFrame</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>X</strong> (<em>A pandas Series containing the time-series features</em>) – Each entry in the series is a timeseries object</li>
+<li><strong>y</strong> (<em>A pandas Series containing the targets</em>)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sktime.datasets.base.load_gunpoint_dataframe">
+<code class="descclassname">sktime.datasets.base.</code><code class="descname">load_gunpoint_dataframe</code><span class="sig-paren">(</span><em>split='TRAIN'</em>, <em>return_X_y=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/datasets/base.html#load_gunpoint_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.datasets.base.load_gunpoint_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the GunPoint time series classification problem and returns X and y</p>
+<p>Dimensionality:     univariate
+Series length:      150
+Train cases:        50
+Test cases:         150
+Number of classes:  2</p>
+<p>This dataset involves one female actor and one male actor making a motion with their
+hand. The two classes are: Gun-Draw and Point: For Gun-Draw the actors have their
+hands by their sides. They draw a replicate gun from a hip-mounted holster, point it
+at a target for approximately one second, then return the gun to the holster, and
+their hands to their sides. For Point the actors have their gun by their sides.
+They point with their index fingers to a target for approximately one second, and
+then return their hands to their sides. For both classes, we tracked the centroid
+of the actor’s right hands in both X- and Y-axes, which appear to be highly
+correlated. The data in the archive is just the X-axis.</p>
+<p>Dataset details: <a class="reference external" href="http://timeseriesclassification.com/description.php?Dataset=GunPoint">http://timeseriesclassification.com/description.php?Dataset=GunPoint</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>split</strong> (<em>string</em><em> (</em><em>either &quot;TRAIN&quot;</em><em> or </em><em>&quot;TEST&quot;</em><em>, </em><em>default = 'TRAIN'</em><em>)</em>) – Whether to load the default train or test partition of the problem</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>X</strong> (<em>pandas DataFrame with m rows and c columns</em>) – The time series data for the problem with m cases and c dimensions</li>
+<li><strong>y</strong> (<em>numpy array</em>) – The class labels for each case in X</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sktime.datasets.base.load_italy_power_demand_dataframe">
+<code class="descclassname">sktime.datasets.base.</code><code class="descname">load_italy_power_demand_dataframe</code><span class="sig-paren">(</span><em>split='TRAIN'</em>, <em>return_X_y=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/datasets/base.html#load_italy_power_demand_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.datasets.base.load_italy_power_demand_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads the ItalyPowerDemand time series classification problem and returns X and y</p>
+<p>Dimensionality:     univariate
+Series length:      24
+Train cases:        67
+Test cases:         1029
+Number of classes:  2</p>
+<p>The data was derived from twelve monthly electrical power demand time series from Italy and
+first used in the paper “Intelligent Icons: Integrating Lite-Weight Data Mining and
+Visualization into GUI Operating Systems”. The classification task is to distinguish days
+from Oct to March (inclusive) from April to September.</p>
+<p>Dataset details: <a class="reference external" href="http://timeseriesclassification.com/description.php?Dataset=ItalyPowerDemand">http://timeseriesclassification.com/description.php?Dataset=ItalyPowerDemand</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>split</strong> (<em>string</em><em> (</em><em>either &quot;TRAIN&quot;</em><em> or </em><em>&quot;TEST&quot;</em><em>, </em><em>default = 'TRAIN'</em><em>)</em>) – Whether to load the default train or test partition of the problem</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>X</strong> (<em>pandas DataFrame with m rows and c columns</em>) – The time series data for the problem with m cases and c dimensions</li>
+<li><strong>y</strong> (<em>numpy array</em>) – The class labels for each case in X</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sktime.datasets.base.read_single_series_data">
+<code class="descclassname">sktime.datasets.base.</code><code class="descname">read_single_series_data</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/datasets/base.html#read_single_series_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.datasets.base.read_single_series_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>reads data from the supplied file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file</strong> (<em>pre-opended file object</em>) – the file to be read from</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>X</strong> (<em>A pandas DataFrame containing the time-series features</em>)</li>
+<li><strong>y</strong> (<em>A pandas Series containing the targets</em>)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sktime.regressors.html" class="btn btn-neutral float-right" title="sktime.regressors package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="sktime.datasets.html" class="btn btn-neutral float-left" title="sktime.datasets package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

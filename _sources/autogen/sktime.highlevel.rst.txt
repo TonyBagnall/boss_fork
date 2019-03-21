@@ -1,0 +1,7 @@
+sktime.highlevel module
+=======================
+
+.. automodule:: sktime.highlevel
+    :members:
+    :undoc-members:
+    :show-inheritance:

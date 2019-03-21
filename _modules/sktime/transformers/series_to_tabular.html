@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sktime.transformers.series_to_tabular &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../autogen/sktime.html">sktime package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extension.html">Extension Guidelines</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>sktime.transformers.series_to_tabular</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for sktime.transformers.series_to_tabular</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">..utils.validation</span> <span class="k">import</span> <span class="n">check_equal_index</span>
+<span class="kn">from</span> <span class="nn">..utils.transformations</span> <span class="k">import</span> <span class="n">tabularize</span>
+<span class="kn">from</span> <span class="nn">.series_to_series</span> <span class="k">import</span> <span class="n">RandomIntervalSegmenter</span>
+<span class="kn">from</span> <span class="nn">sklearn.utils.validation</span> <span class="k">import</span> <span class="n">check_is_fitted</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;RandomIntervalFeatureExtractor&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="RandomIntervalFeatureExtractor"><a class="viewcode-back" href="../../../autogen/sktime.transformers.series_to_tabular.html#sktime.transformers.series_to_tabular.RandomIntervalFeatureExtractor">[docs]</a><span class="k">class</span> <span class="nc">RandomIntervalFeatureExtractor</span><span class="p">(</span><span class="n">RandomIntervalSegmenter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transformer that segments time-series into random intervals</span>
+<span class="sd">    and subsequently extracts series-to-primitives features from each interval.</span>
+
+<span class="sd">    n_intervals: str or int</span>
+<span class="sd">        Number of random intervals to generate.</span>
+<span class="sd">        - If &quot;fixed&quot;, sqrt of length of time-series is used.</span>
+<span class="sd">        - If &quot;random&quot;, random number of intervals is generated.</span>
+<span class="sd">        - If integer, integer gives (fixed) number of intervals to generate.</span>
+
+<span class="sd">        Default is &quot;sqrt&quot;.</span>
+<span class="sd">    features: None or list of functions</span>
+<span class="sd">        - If list of function, applies each function to random intervals to extract features.</span>
+<span class="sd">        - If None, only the mean is extracted.</span>
+<span class="sd">        Default is None.</span>
+
+<span class="sd">    random_state: : int, RandomState instance or None, optional (default=None)</span>
+<span class="sd">        - If int, random_state is the seed used by the random number generator;</span>
+<span class="sd">        - If RandomState instance, random_state is the random number generator;</span>
+<span class="sd">        - If None, the random number generator is the RandomState instance used</span>
+<span class="sd">        by `np.random`.</span>
+
+<span class="sd">    check_input: boolean, optional (default=True)</span>
+<span class="sd">        When set to ``True``, inputs will be validated, otherwise inputs are assumed to be valid</span>
+<span class="sd">        and no checks are performed. Use with caution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_intervals</span><span class="o">=</span><span class="s1">&#39;sqrt&#39;</span><span class="p">,</span> <span class="n">min_length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">check_input</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RandomIntervalFeatureExtractor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">n_intervals</span><span class="o">=</span><span class="n">n_intervals</span><span class="p">,</span>
+            <span class="n">min_length</span><span class="o">=</span><span class="n">min_length</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="n">check_input</span><span class="o">=</span><span class="n">check_input</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Check input of feature calculators, i.e list of functions to be applied to time-series</span>
+        <span class="k">if</span> <span class="n">features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">([</span><span class="n">callable</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">features</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">=</span> <span class="n">features</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Features must be list containing only functions (callables) to be &#39;</span>
+                             <span class="s1">&#39;applied to the data columns&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RandomIntervalFeatureExtractor.transform"><a class="viewcode-back" href="../../../autogen/sktime.transformers.series_to_tabular.html#sktime.transformers.series_to_tabular.RandomIntervalFeatureExtractor.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transform X, segments time-series in each column into random intervals using interval indices generated</span>
+<span class="sd">        during `fit` and extracts features from each interval.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : nested pandas DataFrame of shape [n_samples, n_features]</span>
+<span class="sd">            Nested dataframe with time-series in cells.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Xt : pandas DataFrame</span>
+<span class="sd">          Transformed pandas DataFrame with same number of rows and one column for each generated interval.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check is fit had been called</span>
+        <span class="n">check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;intervals_&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Cast into 2d dataframe</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c1"># check inputs</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_input</span><span class="p">:</span>
+            <span class="c1"># Check that the input is of the same shape as the one passed</span>
+            <span class="c1"># during fit.</span>
+            <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_shape_</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Number of columns of input is different from what was seen&#39;</span>
+                                 <span class="s1">&#39;in `fit`&#39;</span><span class="p">)</span>
+            <span class="c1"># Input validation</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">fit_idx</span><span class="p">,</span> <span class="n">trans_idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">trans_idx</span><span class="p">,</span> <span class="n">fit_idx</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">check_equal_index</span><span class="p">(</span><span class="n">X</span><span class="p">),</span>
+                                                                                         <span class="bp">self</span><span class="o">.</span><span class="n">input_indexes_</span><span class="p">)]):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Indexes of input time-series are different from what was seen in `fit`&#39;</span><span class="p">)</span>
+
+        <span class="n">n_rows</span><span class="p">,</span> <span class="n">n_cols</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">n_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span>
+        <span class="n">n_cols_intervals</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">intervals</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">intervals</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals_</span><span class="p">])</span>
+
+        <span class="c1"># Compute features on intervals.</span>
+        <span class="n">Xt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_rows</span><span class="p">,</span> <span class="n">n_features</span> <span class="o">*</span> <span class="n">n_cols_intervals</span><span class="p">))</span>  <span class="c1"># Allocate output array for transformed data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns_</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="c1"># Tabularize each column assuming series have equal indexes in any given column.</span>
+            <span class="c1"># TODO generalise to non-equal-index cases</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">tabularize</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">return_array</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+                <span class="c1"># TODO generalise to series-to-series functions and function kwargs</span>
+                <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals_</span><span class="p">[</span><span class="n">c</span><span class="p">]:</span>
+                    <span class="n">interval</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[:,</span> <span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+
+                    <span class="c1"># Try to use optimised computations over axis if possible, otherwise iterate over rows.</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">Xt</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">interval</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{func.__name__}</span><span class="s2">() got an unexpected keyword argument &#39;axis&#39;&quot;</span><span class="p">:</span>
+                            <span class="n">Xt</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">apply_along_axis</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">columns_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;</span><span class="si">{colname}</span><span class="s1">_</span><span class="si">{start}</span><span class="s1">_</span><span class="si">{end}</span><span class="s1">_</span><span class="si">{func.__name__}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">Xt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">Xt</span><span class="p">)</span>
+        <span class="n">Xt</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns_</span>
+
+        <span class="k">if</span> <span class="n">Xt</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Xt</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">Xt</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

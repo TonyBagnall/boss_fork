@@ -1,0 +1,384 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sktime.pipeline module &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Examples" href="../examples.html" />
+    <link rel="prev" title="sktime.model_selection module" href="sktime.model_selection.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="sktime.html">sktime package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="sktime.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="sktime.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="sktime.highlevel.html">sktime.highlevel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sktime.model_selection.html">sktime.model_selection module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">sktime.pipeline module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extension.html">Extension Guidelines</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="sktime.html">sktime package</a> &raquo;</li>
+        
+      <li>sktime.pipeline module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autogen/sktime.pipeline.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-sktime.pipeline">
+<span id="sktime-pipeline-module"></span><h1>sktime.pipeline module<a class="headerlink" href="#module-sktime.pipeline" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="sktime.pipeline.TSFeatureUnion">
+<em class="property">class </em><code class="descclassname">sktime.pipeline.</code><code class="descname">TSFeatureUnion</code><span class="sig-paren">(</span><em>transformer_list</em>, <em>n_jobs=None</em>, <em>transformer_weights=None</em>, <em>preserve_dataframe=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/pipeline.html#TSFeatureUnion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.pipeline.TSFeatureUnion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.pipeline.FeatureUnion</span></code></p>
+<p>Concatenates results of multiple transformer objects.
+This estimator applies a list of transformer objects in parallel to the
+input data, then concatenates the results. This is useful to combine
+several feature extraction mechanisms into a single transformer.
+Parameters of the transformers may be set using its name and the parameter
+name separated by a ‘__’. A transformer may be replaced entirely by
+setting the parameter with its name to another transformer,
+or removed by setting to ‘drop’ or <code class="docutils literal notranslate"><span class="pre">None</span></code>.
+:param transformer_list: List of transformer objects to be applied to the data. The first</p>
+<blockquote>
+<div>half of each tuple is the name of the transformer.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Number of jobs to run in parallel.
+<code class="docutils literal notranslate"><span class="pre">None</span></code> means 1 unless in a <code class="xref py py-obj docutils literal notranslate"><span class="pre">joblib.parallel_backend</span></code> context.
+<code class="docutils literal notranslate"><span class="pre">-1</span></code> means using all processors. See <span class="xref std std-term">Glossary</span>
+for more details.</li>
+<li><strong>transformer_weights</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a><em>, </em><em>optional</em>) – Multiplicative weights for features per transformer.
+Keys are transformer names, values the weights.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="sktime.pipeline.TSFeatureUnion.fit_transform">
+<code class="descname">fit_transform</code><span class="sig-paren">(</span><em>X</em>, <em>y=None</em>, <em>**fit_params</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/pipeline.html#TSFeatureUnion.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.pipeline.TSFeatureUnion.fit_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit all transformers, transform the data and concatenate results.
+:param X: Input data to be transformed.
+:type X: pandas DataFrame
+:param y: Targets for supervised learning.
+:type y: pandas Series, shape (n_samples, …), optional</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>Xt</strong> – hstack of results of transformers. sum_n_components is the
+sum of n_components (output dimension) over transformers.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sktime.pipeline.TSFeatureUnion.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/pipeline.html#TSFeatureUnion.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.pipeline.TSFeatureUnion.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform X separately by each transformer, concatenate results.
+:param X: Input data to be transformed.
+:type X: pandas DataFrame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>Xt</strong> – hstack of results of transformers. sum_n_components is the
+sum of n_components (output dimension) over transformers.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">pandas DataFrame</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sktime.pipeline.TSPipeline">
+<em class="property">class </em><code class="descclassname">sktime.pipeline.</code><code class="descname">TSPipeline</code><span class="sig-paren">(</span><em>steps</em>, <em>memory=None</em>, <em>random_state=None</em>, <em>check_input=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/pipeline.html#TSPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.pipeline.TSPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.pipeline.Pipeline</span></code></p>
+<p>Pipeline of transforms with a final estimator.</p>
+<p>Sequentially apply a list of transforms and a final estimator.
+Intermediate steps of the pipeline must be ‘transforms’, that is, they must implement fit and transform methods.
+The final estimator only needs to implement fit.
+The transformers in the pipeline can be cached using <code class="docutils literal notranslate"><span class="pre">memory</span></code> argument.
+The purpose of the pipeline is to assemble several steps that can be
+cross-validated together while setting different parameters.
+For this, it enables setting parameters of the various steps using their
+names and the parameter name separated by a ‘__’, as in the example below.
+A step’s estimator may be replaced entirely by setting the parameter
+with its name to another estimator, or a transformer removed by setting
+to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – List of (name, transform) tuples (implementing fit/transform) that are
+chained, in the order in which they are chained, with the last object
+an estimator.</li>
+<li><strong>memory</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><em>object with the joblib.Memory interface</em><em>, </em><em>optional</em>) – Used to cache the fitted transformers of the pipeline. By default,
+no caching is performed. If a string is given, it is the path to
+the caching directory. Enabling caching triggers a clone of
+the transformers before fitting. Therefore, the transformer
+instance given to the pipeline cannot be inspected
+directly. Use the attribute <code class="docutils literal notranslate"><span class="pre">named_steps</span></code> or <code class="docutils literal notranslate"><span class="pre">steps</span></code> to
+inspect estimators within the pipeline. Caching the
+transformers is advantageous when fitting is time consuming.</li>
+<li><strong>random_state</strong> (<em>: int</em><em>, </em><em>RandomState instance</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Passed random state is propagated to all steps of the pipeline that have a random state attribute.
+- If int, random_state is the seed used by the random number generator;
+- If RandomState instance, random_state is the random number generator;
+- If None, the random number generator is the RandomState instance used
+by <cite>np.random</cite>.</li>
+<li><strong>check_input</strong> (<em>boolean</em><em>, </em><em>optional</em><em> (</em><em>default=True</em><em>)</em>) – When set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, inputs will be validated, otherwise inputs are assumed to be valid
+and no checks are performed in any step of the pipeline. Use with caution.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="sktime.pipeline.TSPipeline.named_steps">
+<code class="descname">named_steps</code><a class="headerlink" href="#sktime.pipeline.TSPipeline.named_steps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read-only attribute to access any step parameter by user given name.
+Keys are step names and values are steps parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bunch object, a dictionary with attribute access</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sktime.pipeline.TSPipeline.check_input">
+<code class="descname">check_input</code><a class="headerlink" href="#sktime.pipeline.TSPipeline.check_input" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sktime.pipeline.TSPipeline.random_state">
+<code class="descname">random_state</code><a class="headerlink" href="#sktime.pipeline.TSPipeline.random_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="sktime.model_selection.html" class="btn btn-neutral float-left" title="sktime.model_selection module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+sktime.transformers.shapelets module
+====================================
+
+.. automodule:: sktime.transformers.shapelets
+    :members:
+    :undoc-members:
+    :show-inheritance:

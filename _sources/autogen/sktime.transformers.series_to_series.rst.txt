@@ -1,0 +1,7 @@
+sktime.transformers.series\_to\_series module
+=============================================
+
+.. automodule:: sktime.transformers.series_to_series
+    :members:
+    :undoc-members:
+    :show-inheritance:

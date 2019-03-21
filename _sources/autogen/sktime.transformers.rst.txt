@@ -1,0 +1,20 @@
+sktime.transformers package
+===========================
+
+.. automodule:: sktime.transformers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   sktime.transformers.base
+   sktime.transformers.compose
+   sktime.transformers.example_transformers
+   sktime.transformers.series_to_series
+   sktime.transformers.series_to_tabular
+   sktime.transformers.shapelets
+

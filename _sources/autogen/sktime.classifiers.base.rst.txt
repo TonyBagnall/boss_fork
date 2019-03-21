@@ -1,0 +1,7 @@
+sktime.classifiers.base module
+==============================
+
+.. automodule:: sktime.classifiers.base
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,923 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sktime.transformers.shapelets &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../autogen/sktime.html">sktime package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extension.html">Extension Guidelines</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>sktime.transformers.shapelets</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for sktime.transformers.shapelets</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="c1"># from scipy.stats.mstats import zscore</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="k">import</span> <span class="n">sqeuclidean</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble.forest</span> <span class="k">import</span> <span class="n">RandomForestClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="k">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sktime.datasets</span> <span class="k">import</span> <span class="n">load_gunpoint_dataframe</span>
+<span class="kn">from</span> <span class="nn">sktime.transformers.base</span> <span class="k">import</span> <span class="n">BaseTransformer</span>
+
+<span class="c1"># TO-DO: thorough testing (some initial testing completed, but passing the code to David to develop</span>
+<span class="c1">#        before everything has been fully verified)</span>
+<span class="c1"># TO-DO: check the validity of the binary info gain method and implement the early abandon as</span>
+<span class="c1">#        in original shapelet paper (not possible for non-binary IG however)</span>
+<span class="c1"># TO-DO: revisit contract timing - currently it&#39;s lazy (will process the last shapelet and go over the limit)</span>
+<span class="c1">#        A more sensible approach would be to estimate the average/median/max shapelet calculation time and</span>
+<span class="c1">#        only process a new candidate if there is enough time left. Max would be safest but most conservative</span>
+<span class="c1">#        estimate, mean is easiest to calculate without storing/sorting run-times. Investigation req.</span>
+<span class="c1"># TO-DO: Random and ContractedRandom transforms use all of the same logic but have different class types for</span>
+<span class="c1">#        distinctions (Contracted extends Random with flags to set). However, Tony would now prefer to have a</span>
+<span class="c1">#        single class with a flag for contract or not, so code should be refactored into a single class</span>
+<span class="c1"># TO-DO: Transform currently only for univariate data - once all of the above is reconciled we should extend</span>
+<span class="c1">#        to the multi-variate case (should be fairly simple - done in Java, though not sure on the specifics/how</span>
+<span class="c1">#        complete it is and if we could use mutivariate data in other ways too</span>
+<span class="c1"># TO-DO: Currently extends TransformerMixin - class should extend the sktime transformer base class (not on dev at</span>
+<span class="c1">#        branch at time of writing however so this can be updated later)</span>
+<span class="c1"># TO-DO: Add a parameter to cap the number of shapelets to use in the final transform. Not done yet as we should</span>
+<span class="c1">#        look at the Java implementation to see what the default was. If there isn&#39;t one, we could use an</span>
+<span class="c1">#        arbitrary value such as 200 as a default? The limit would be after all shapelets are extracted and sorted</span>
+<span class="c1">#        in descending order of information gain (e.g. keep the top 200 shapelets, not the first 200 that</span>
+<span class="c1">#        were visited)</span>
+<span class="c1"># TO-DO: verbose output of time remaining for contract is currently in decimal format, e.g.:</span>
+<span class="c1">#        &gt; Candidate finished. 0.418 minutes remaining.</span>
+<span class="c1">#        it would be nicer (but not that important) to convert this to mins:secs rather than a decimal for minutes</span>
+<span class="c1">#        e.g. 5:45 left, rather than 5.75</span>
+
+
+<div class="viewcode-block" id="RandomShapeletTransform"><a class="viewcode-back" href="../../../autogen/sktime.transformers.shapelets.html#sktime.transformers.shapelets.RandomShapeletTransform">[docs]</a><span class="k">class</span> <span class="nc">RandomShapeletTransform</span><span class="p">(</span><span class="n">BaseTransformer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Random Shapelet Transform.</span>
+
+<span class="sd">    A transformer to extract shapelets from a training dataset, then transform any</span>
+<span class="sd">    passed dataset into primitives using each extracted shapelet. For k shapelets,</span>
+<span class="sd">    an input case q is transformed by calculating the distance from q to each shapelet</span>
+<span class="sd">    and the transformed output case is composed of k features, where the kth attribute</span>
+<span class="sd">    is the distance from q to the kth shapelet.</span>
+
+<span class="sd">    This implementation of the transform is based on the findings in [2]; it uses random</span>
+<span class="sd">    sampling of candidate shapelets, rather than a full enumeration of candidates as</span>
+<span class="sd">    originally proposed in [1], as it has been shown that there is no significant</span>
+<span class="sd">    decrease in accuracy but a significant reduction in runtime through this approach.</span>
+
+<span class="sd">    There are two versions of the transform: RandomShapeletTransform and</span>
+<span class="sd">    ContractedRandomShapeletTransform. For each training series visited, both</span>
+<span class="sd">    implementations assess a specified number of candidate shapelets per series. However,</span>
+<span class="sd">    this version visits an explict number of cases to extract these shapelets from (from</span>
+<span class="sd">    1 to len(X), whereas ContractedRandomShapeletTransform visits training cases while</span>
+<span class="sd">    time remains on a contact (specified in minutes).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    min_shapelet_length : int (default = 3)</span>
+<span class="sd">        The minimum candidate shapelet length</span>
+<span class="sd">    max_shapelet_length :int (default = np.inf)</span>
+<span class="sd">        The maximum candidate shapelet length (default = np.inf). This value is</span>
+<span class="sd">        an upper-bound and is automatically capped to the series length if the</span>
+<span class="sd">        specified value exceeds the length of the shapelet.</span>
+<span class="sd">    num_cases_to_sample: int (default = 5)</span>
+<span class="sd">        The number of training cases to extract candidate shapelets from.</span>
+<span class="sd">    num_shapelets_to_sample_per_case: int (default = 15)</span>
+<span class="sd">        The number of shapelet candidates to evaluate per series in the fit method</span>
+<span class="sd">    seed: int (default = 0)</span>
+<span class="sd">        To seed the shapelet discovery to ensure deterministic results across multiple runs</span>
+<span class="sd">    dim_to_use: int (default = 0)</span>
+<span class="sd">        Which dimension of the data to use</span>
+<span class="sd">    remove_self_similar: bool (default = True)</span>
+<span class="sd">        Whether to remove self-similar shapelets before transforming. A candidate shapelet</span>
+<span class="sd">        is considered to be self-similar to another candidate if they are taken from the</span>
+<span class="sd">        same dimension of the same training series. With this set to True, any overlapping</span>
+<span class="sd">        candidates will be removed to preserve the best candidate (i.e. highest info gain)</span>
+<span class="sd">    verbose: bool (default = False)</span>
+<span class="sd">        Whether to print information during shapelet extraction</span>
+<span class="sd">    use_binary_info_gain: bool (default = True)</span>
+<span class="sd">        Whether to use one-vs-all information gain (as in [2]) or consider each class</span>
+<span class="sd">        independently when calculating the information gain of a candidate (as in [1])</span>
+<span class="sd">    trim_shapelets: bool (default = True)</span>
+<span class="sd">        Whether to crop the final list of extracted shapelets to the top k. If specified,</span>
+<span class="sd">        this is an upper-bound; if less than k shapelets are found then this parameter will</span>
+<span class="sd">        have no effect</span>
+<span class="sd">    num_shapelets_to_trim_to: int (default = 200)</span>
+<span class="sd">        If trim_shapelets = True, this is the number of shapelets to trim to.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    shapelets: list of Shapelet objects</span>
+<span class="sd">        The list of extracted shapelets after fit is called (initially shapelets = None)</span>
+
+
+<span class="sd">    References:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    [1] Hills, Jon, Jason Lines, Edgaras Baranauskas, James Mapp, and Anthony Bagnall.</span>
+<span class="sd">    &quot;Classification of time series by shapelet transformation.&quot; Data Mining and Knowledge</span>
+<span class="sd">    Discovery 28, no. 4 (2014): 851-881.</span>
+
+<span class="sd">    [2] Bostrom, Aaron, and Anthony Bagnall.</span>
+<span class="sd">    &quot;Binary shapelet transform for multiclass time series classification.&quot;</span>
+<span class="sd">    In Transactions on Large-Scale Data-and Knowledge-Centered Systems XXXII,</span>
+<span class="sd">    pp. 24-46. Springer, Berlin, Heidelberg, 2017.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">min_shapelet_length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                 <span class="n">max_shapelet_length</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+                 <span class="n">num_cases_to_sample</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                 <span class="n">num_shapelets_to_sample_per_case</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+                 <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">dim_to_use</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">remove_self_similar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">use_binary_info_gain</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">trim_shapelets</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">num_shapelets_to_trim_to</span><span class="o">=</span><span class="mi">200</span>
+                 <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_shapelet_length</span> <span class="o">=</span> <span class="n">min_shapelet_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_shapelet_length</span> <span class="o">=</span> <span class="n">max_shapelet_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_cases_to_sample</span> <span class="o">=</span> <span class="n">num_cases_to_sample</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_shapelets_to_sample_per_case</span> <span class="o">=</span> <span class="n">num_shapelets_to_sample_per_case</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_to_use</span> <span class="o">=</span> <span class="n">dim_to_use</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_self_similar</span> <span class="o">=</span> <span class="n">remove_self_similar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shapelets</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_limit_on</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_binary_info_gain</span> <span class="o">=</span> <span class="n">use_binary_info_gain</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trim_shapelets</span> <span class="o">=</span> <span class="n">trim_shapelets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_shapelets_to_trim_to</span> <span class="o">=</span> <span class="n">num_shapelets_to_trim_to</span>
+
+<div class="viewcode-block" id="RandomShapeletTransform.fit"><a class="viewcode-back" href="../../../autogen/sktime.transformers.shapelets.html#sktime.transformers.shapelets.RandomShapeletTransform.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A method to fit the shapelet transform to a specified X and y</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X: pandas DataFrame</span>
+<span class="sd">            The training input samples.</span>
+<span class="sd">        y: array-like or list</span>
+<span class="sd">            The class values for X</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : RandomShapeletTransform</span>
+<span class="sd">            This estimator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_to_use</span><span class="p">]])</span>
+        <span class="n">num_ins</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">class_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">y</span><span class="p">)]))</span>
+
+        <span class="n">cases_to_sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cases_to_sample</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit_on</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cases_to_sample</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+            <span class="n">cases_to_sample</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="n">class_counts</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span><span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">class_vals</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">c_val</span> <span class="ow">in</span> <span class="n">y</span><span class="p">:</span>
+            <span class="n">class_counts</span><span class="p">[</span><span class="n">c_val</span><span class="p">]</span> <span class="o">+=</span><span class="mi">1</span>
+
+        <span class="n">rand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+        <span class="n">rand</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="c1"># Here we establish the order of cases to sample. We need to sample x cases and y shapelets from each (where x = num_cases_to_sample</span>
+        <span class="c1"># and y = num_shapelets_to_sample_per_case). We could simply sample x cases without replacement and y shapelets from each case, but</span>
+        <span class="c1"># the idea is that if we are using a time contract we may extract all y shapelets from each x candidate and still have time remaining.</span>
+        <span class="c1"># Therefore, if we get a list of the indices of the series and shuffle them appropriately, we can go through the list again and extract</span>
+        <span class="c1"># another y shapelets from each series (if we have time).</span>
+        <span class="c1">#</span>
+        <span class="c1"># We also want to ensure that we visit all classes so we will visit in round-robin order. Therefore, the code below extracts the indices</span>
+        <span class="c1"># of all series by class, shuffles the indices for each class independently, and then combines them in alternating order. This results in</span>
+        <span class="c1"># a shuffled list of indices that are in alternating class order (e.g. 1,2,3,1,2,3,1,2,3,1...)</span>
+
+        <span class="c1"># indices by class</span>
+        <span class="n">idxs_to_sample_by_class</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:[]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">class_vals</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)):</span>
+            <span class="n">idxs_to_sample_by_class</span><span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>  <span class="c1"># (index, class_val)</span>
+
+        <span class="c1"># shuffle lists and get iterators for each class list</span>
+        <span class="n">class_val_iterators</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">class_vals</span><span class="p">)):</span>
+            <span class="n">rand</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">idxs_to_sample_by_class</span><span class="p">[</span><span class="n">class_vals</span><span class="p">[</span><span class="n">c</span><span class="p">]])</span>
+            <span class="n">class_val_iterators</span><span class="p">[</span><span class="n">class_vals</span><span class="p">[</span><span class="n">c</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">idxs_to_sample_by_class</span><span class="p">[</span><span class="n">class_vals</span><span class="p">[</span><span class="n">c</span><span class="p">]]))</span>
+
+        <span class="c1"># now iterate through each and add to a single list of indices (with class vals as tuples for convenience)</span>
+        <span class="n">to_add</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">idxs_to_sample</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="n">to_add</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">start_quant</span> <span class="o">=</span> <span class="n">to_add</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">class_vals</span><span class="p">)):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">idxs_to_sample</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">class_val_iterators</span><span class="p">[</span><span class="n">class_vals</span><span class="p">[</span><span class="n">c</span><span class="p">]]))</span>
+                    <span class="n">to_add</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">if</span> <span class="n">to_add</span> <span class="o">==</span> <span class="n">start_quant</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;Unexpected end of data - more class labels than instances&quot;</span><span class="p">)</span>
+
+        <span class="c1"># once extracted we will add all shapelets to this list</span>
+        <span class="n">all_shapelets</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># this dictionary will be used to store all possible starting positions and shapelet lengths for a give series length. This</span>
+        <span class="c1"># is because we enumerate all possible candidates and sample without replacement when assessing a series. If we have two series</span>
+        <span class="c1"># of the same length then they will obviously have the same valid shapelet starting positions and lengths (especially in standard</span>
+        <span class="c1"># datasets where all series are equal length) so it makes sense to store the possible candidates and reuse, rather than</span>
+        <span class="c1"># recalculating each time</span>
+        <span class="c1">#</span>
+        <span class="c1"># Initially the dictionary will be empty, and each time a new series length is seen the dict will be updated. Next time that length</span>
+        <span class="c1"># is used the dict will have an entry so can simply reuse</span>
+        <span class="n">possible_candidates_per_series_length</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># for timing the extraction when contracting</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">time_taken</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">start_time</span>
+
+        <span class="c1"># a flag to indicate if extraction should stop (either contract has ended or we&#39;ve visited all required cases)</span>
+        <span class="n">continue_extraction</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">continue_extraction</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">series_id_and_class</span> <span class="ow">in</span> <span class="n">idxs_to_sample</span><span class="p">:</span>
+                <span class="n">series_id</span> <span class="o">=</span> <span class="n">series_id_and_class</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">idx</span><span class="o">+=</span><span class="mi">1</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit_on</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;visiting series: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">series_id</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; (#&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cases_to_sample</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;)&quot;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;visiting series: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">series_id</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; (#&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;)&quot;</span><span class="p">)</span>
+                <span class="n">this_series_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">series_id</span><span class="p">])</span>
+
+                <span class="c1"># The bound on possible shapelet lengths will differ series-to-series if using unequal length data.</span>
+                <span class="c1"># However, shapelets cannot be longer than the series, so set to the minimum of the series length</span>
+                <span class="c1"># and max shapelet length (which is inf by default, unless set)</span>
+                <span class="n">this_shapelet_length_upper_bound</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">this_series_len</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">max_shapelet_length</span><span class="p">)</span>
+
+                <span class="n">series_shapelets</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="c1"># enumerate all possible candidate starting positions and lengths.</span>
+                <span class="c1"># First, try to reuse if they have been calculated for a series of the same length before</span>
+                <span class="n">candidate_starts_and_lens</span> <span class="o">=</span> <span class="n">possible_candidates_per_series_length</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">this_series_len</span><span class="p">)</span>
+                <span class="c1"># else calculate them for this series length and store for possible use again</span>
+                <span class="k">if</span> <span class="n">candidate_starts_and_lens</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">candidate_starts_and_lens</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="p">[</span><span class="n">start</span><span class="p">,</span> <span class="n">length</span><span class="p">]</span> <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">this_series_len</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_shapelet_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">length</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_shapelet_length</span><span class="p">,</span> <span class="n">this_shapelet_length_upper_bound</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">start</span> <span class="o">+</span> <span class="n">length</span> <span class="o">&lt;=</span> <span class="n">this_series_len</span><span class="p">]</span>
+                    <span class="n">possible_candidates_per_series_length</span><span class="p">[</span><span class="n">this_series_len</span><span class="p">]</span> <span class="o">=</span> <span class="n">candidate_starts_and_lens</span>
+
+                <span class="c1"># from the possible start and lengths, sample without replacement the specified number of shapelets and evaluate</span>
+                <span class="n">cand_idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rand</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">candidate_starts_and_lens</span><span class="p">))),</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_shapelets_to_sample_per_case</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+                <span class="n">cands</span> <span class="o">=</span> <span class="p">[</span><span class="n">candidate_starts_and_lens</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cand_idx</span><span class="p">]</span>
+
+                <span class="c1"># evaluate each candidate</span>
+                <span class="k">for</span> <span class="n">candidate_info</span> <span class="ow">in</span> <span class="n">cands</span><span class="p">:</span>
+                    <span class="c1"># for convenience, extract candidate data from series_id and znorm it</span>
+                    <span class="n">candidate</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">series_id</span><span class="p">][</span><span class="n">candidate_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">candidate_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">candidate_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+                    <span class="n">candidate</span> <span class="o">=</span> <span class="n">RandomShapeletTransform</span><span class="o">.</span><span class="n">zscore</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+
+                    <span class="c1"># now go through all other series and get a distance from the candidate to each</span>
+                    <span class="n">loop_dists</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+                        <span class="c1"># don&#39;t calculate distance to self</span>
+                        <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">series_id</span><span class="p">:</span>
+
+                            <span class="n">min_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+                            <span class="n">comparison</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="c1"># comparison series</span>
+
+                            <span class="c1"># two implementations for comparing a candidate to all series - for loop and list comprehension (lc).</span>
+                            <span class="c1"># Timing results to follow but there seems to be very marginal difference from informal testing</span>
+
+                            <span class="c1"># for loop vs list comprehension</span>
+                            <span class="c1"># loop</span>
+                            <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">comparison</span><span class="p">)</span><span class="o">-</span><span class="n">candidate_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                                <span class="n">comp</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">candidate_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+                                <span class="n">comp</span> <span class="o">=</span> <span class="n">RandomShapeletTransform</span><span class="o">.</span><span class="n">zscore</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
+
+                                <span class="n">dist</span> <span class="o">=</span> <span class="n">sqeuclidean</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">comp</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="n">min_dist</span><span class="p">:</span>
+                                    <span class="n">min_dist</span> <span class="o">=</span> <span class="n">dist</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_binary_info_gain</span><span class="p">:</span>
+                                <span class="c1"># if doing binary info gain we need to make it a 1 vs all encoding</span>
+                                <span class="c1"># if this series is from the same class as the candidate, add to the orderline with the class value</span>
+                                <span class="k">if</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="n">series_id_and_class</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                                    <span class="n">loop_dists</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">min_dist</span><span class="p">,</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                                <span class="c1"># else, the series came from another class so combine into an &quot;other&quot; class:</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">loop_dists</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">min_dist</span><span class="p">,</span> <span class="s1">&#39;otherClassForBinary&#39;</span><span class="p">))</span>
+
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">loop_dists</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">min_dist</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+                            <span class="c1">#lc - does the same as above without a for loop</span>
+                            <span class="c1"># a = np.min([sqeuclidean(candidate, zscore(X[i][start:start + candidate_info[1]])) for start in range(0, len(comparison) - candidate_info[1])])</span>
+                            <span class="c1"># loop_dists.append((a, y[i]))</span>
+
+                            <span class="c1"># timing (consistent fixed params for both timing results, didn&#39;t record what they were though!)</span>
+                            <span class="c1"># with loop:</span>
+                            <span class="c1"># time = 6.166342258453369</span>
+                            <span class="c1"># time = 7.506842136383057</span>
+
+                            <span class="c1"># with lc:</span>
+                            <span class="c1"># time = 5.624400854110718</span>
+                            <span class="c1"># time = 7.173776388168335</span>
+
+                    <span class="n">loop_dists</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_binary_info_gain</span><span class="p">:</span>
+                        <span class="c1"># add the class counts of the current class to the dictionary</span>
+                        <span class="c1"># and then add num_ins-class_counts[series_id_and_class[1]] to an &quot;other&quot; class</span>
+                        <span class="n">binary_class_counts</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="n">series_id_and_class</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span>  <span class="n">class_counts</span><span class="p">[</span><span class="n">series_id_and_class</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                            <span class="s1">&#39;otherClassForBinary&#39;</span> <span class="p">:</span> <span class="n">num_ins</span><span class="o">-</span><span class="n">class_counts</span><span class="p">[</span><span class="n">series_id_and_class</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                        <span class="p">}</span>
+
+                        <span class="c1"># we can then simply reuse the info gain calculation without editing, but..</span>
+                        <span class="c1"># TO-DO: implement early abandon info gain for 2 classes, as per the original Ye and Keogh shapelet paper</span>
+                        <span class="n">quality</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_info_gain</span><span class="p">(</span><span class="n">loop_dists</span><span class="p">,</span> <span class="n">binary_class_counts</span><span class="p">,</span> <span class="n">num_ins</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># otherwise calculate information gain for all classes vs all</span>
+                        <span class="n">quality</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_info_gain</span><span class="p">(</span><span class="n">loop_dists</span><span class="p">,</span> <span class="n">class_counts</span><span class="p">,</span> <span class="n">num_ins</span><span class="p">,)</span>
+
+                    <span class="n">series_shapelets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Shapelet</span><span class="p">(</span><span class="n">series_id</span><span class="p">,</span> <span class="n">candidate_info</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">candidate_info</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">quality</span><span class="p">,</span> <span class="n">candidate</span><span class="p">))</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit_on</span><span class="p">:</span>
+                        <span class="n">time_now</span> <span class="o">=</span> <span class="n">time_taken</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">time_now</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;time to stop! It&#39;s been &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">time_now</span><span class="o">/</span><span class="mi">60</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span><span class="o">+</span><span class="s2">&quot; minutes&quot;</span><span class="p">)</span>
+                            <span class="n">continue_extraction</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">break</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Candidate finished. &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span><span class="o">-</span><span class="n">time_now</span><span class="p">)</span><span class="o">/</span><span class="mi">60</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span><span class="o">+</span><span class="s2">&quot; minutes remaining.&quot;</span><span class="p">)</span>
+
+                <span class="c1"># add shapelets from this series to the collection for all</span>
+                <span class="n">all_shapelets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">series_shapelets</span><span class="p">)</span>
+
+                <span class="c1"># stopping condition for contracted transform</span>
+                <span class="k">if</span> <span class="n">continue_extraction</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="c1"># stopping condition for iterative transform (i.e. num_cases_to_sample have been visited)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_limit_on</span> <span class="ow">and</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="n">cases_to_sample</span><span class="p">:</span>
+                    <span class="n">continue_extraction</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+
+        <span class="c1"># sort all shapelets by quality</span>
+        <span class="n">all_shapelets</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">info_gain</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># moved to end as it is now possible to visit the same series multiple times, and a better series may be found in the second visit that removes</span>
+        <span class="c1"># the best from the first (and then means previously similar shapelets with that may again be eligible)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_self_similar</span><span class="p">:</span>
+            <span class="n">all_shapelets</span> <span class="o">=</span> <span class="n">RandomShapeletTransform</span><span class="o">.</span><span class="n">remove_self_similar</span><span class="p">(</span><span class="n">all_shapelets</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">shapelets</span> <span class="o">=</span> <span class="n">all_shapelets</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    <span class="c1"># two &quot;self-similar&quot; shapelets are subsequences from the same series that are overlapping. This method</span>
+<div class="viewcode-block" id="RandomShapeletTransform.remove_self_similar"><a class="viewcode-back" href="../../../autogen/sktime.transformers.shapelets.html#sktime.transformers.shapelets.RandomShapeletTransform.remove_self_similar">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">remove_self_similar</span><span class="p">(</span><span class="n">shapelet_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove self-similar shapelets from an input list. Note: this method assumes</span>
+<span class="sd">        that shapelets are pre-sorted in descending order of quality (i.e. if two candidates</span>
+<span class="sd">        are self-similar, the one with the later index will be removed)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        shapelet_list: list of Shapelet objects</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        shapelet_list: list of Shapelet objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># IMPORTANT: shapelets must be in descending order of quality. This is preferable in the fit method as removing self-similar</span>
+        <span class="c1"># shapelets may be False. However, could be dangerous if something else uses this code later. TO-DO: decide the best place to sort</span>
+        <span class="c1">#</span>
+        <span class="c1"># shapelet_list.sort(key=lambda x: x.info_gain, reverse=True)</span>
+
+        <span class="k">def</span> <span class="nf">is_self_similar</span><span class="p">(</span><span class="n">shapelet_one</span><span class="p">,</span> <span class="n">shapelet_two</span><span class="p">):</span>
+            <span class="c1"># not self similar if from different series</span>
+            <span class="k">if</span> <span class="n">shapelet_one</span><span class="o">.</span><span class="n">series_id</span> <span class="o">!=</span> <span class="n">shapelet_two</span><span class="o">.</span><span class="n">series_id</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">shapelet_one</span><span class="o">.</span><span class="n">start_pos</span> <span class="o">&gt;=</span> <span class="n">shapelet_two</span><span class="o">.</span><span class="n">start_pos</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">shapelet_one</span><span class="o">.</span><span class="n">start_pos</span> <span class="o">&lt;=</span> <span class="n">shapelet_two</span><span class="o">.</span><span class="n">start_pos</span> <span class="o">+</span> <span class="n">shapelet_two</span><span class="o">.</span><span class="n">length</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">shapelet_two</span><span class="o">.</span><span class="n">start_pos</span> <span class="o">&gt;=</span> <span class="n">shapelet_one</span><span class="o">.</span><span class="n">start_pos</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">shapelet_two</span><span class="o">.</span><span class="n">start_pos</span> <span class="o">&lt;=</span> <span class="n">shapelet_one</span><span class="o">.</span><span class="n">start_pos</span> <span class="o">+</span> <span class="n">shapelet_one</span><span class="o">.</span><span class="n">length</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">to_return</span> <span class="o">=</span> <span class="p">[</span><span class="n">shapelet_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="c1"># first shapelet must be ok</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">shapelet_list</span><span class="p">)):</span>
+            <span class="n">can_add</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">is_self_similar</span><span class="p">(</span><span class="n">shapelet_list</span><span class="p">[</span><span class="n">s</span><span class="p">],</span><span class="n">shapelet_list</span><span class="p">[</span><span class="n">c</span><span class="p">]):</span>
+                    <span class="n">can_add</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">can_add</span><span class="p">:</span>
+                <span class="n">to_return</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shapelet_list</span><span class="p">[</span><span class="n">s</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">to_return</span></div>
+
+    <span class="c1"># transform a set of data into distances to each extracted shapelet</span>
+<div class="viewcode-block" id="RandomShapeletTransform.transform"><a class="viewcode-back" href="../../../autogen/sktime.transformers.shapelets.html#sktime.transformers.shapelets.RandomShapeletTransform.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">transform_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transforms X according to the extracted shapelets (self.shapelets)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X : pandas DataFrame</span>
+<span class="sd">            The input dataframe to transform</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        output : pandas DataFrame</span>
+<span class="sd">            The transformed dataframe in tabular format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapelets</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Fit not called yet - no shapelets exist!&quot;</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_to_use</span><span class="p">]])</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shapelets</span><span class="p">)],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+            <span class="n">this_series</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shapelets</span><span class="p">)):</span>
+                <span class="c1"># find distance between this series and each shapelet</span>
+                <span class="n">min_dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+                <span class="n">this_shapelet_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapelets</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">length</span>
+
+                <span class="k">for</span> <span class="n">start_pos</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">this_series</span><span class="p">)</span> <span class="o">-</span> <span class="n">this_shapelet_length</span><span class="p">):</span>
+                    <span class="n">comp</span> <span class="o">=</span> <span class="n">this_series</span><span class="p">[</span><span class="n">start_pos</span><span class="p">:</span><span class="n">start_pos</span> <span class="o">+</span> <span class="n">this_shapelet_length</span><span class="p">]</span>
+                    <span class="n">comp</span> <span class="o">=</span> <span class="n">RandomShapeletTransform</span><span class="o">.</span><span class="n">zscore</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
+
+                    <span class="n">dist</span> <span class="o">=</span> <span class="n">sqeuclidean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shapelets</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">comp</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="n">min_dist</span><span class="p">:</span>
+                        <span class="n">min_dist</span> <span class="o">=</span> <span class="n">dist</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">min_dist</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="n">output</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">min_dist</span><span class="p">)</span>
+
+        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="RandomShapeletTransform.fit_transform"><a class="viewcode-back" href="../../../autogen/sktime.transformers.shapelets.html#sktime.transformers.shapelets.RandomShapeletTransform.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fit_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fits and transforms a given input X and y</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X: pandas.DataFrame the input data to transform</span>
+<span class="sd">        y: list or array like of class values corresponding to the indices in X</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Xt : pandas DataFrame</span>
+<span class="sd">            The transformed pandas DataFrame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapelets</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapelets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Trying to fit but shapelets already exist.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No class values specified - shapelet extraction is supervised&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RandomShapeletTransform.get_shapelets"><a class="viewcode-back" href="../../../autogen/sktime.transformers.shapelets.html#sktime.transformers.shapelets.RandomShapeletTransform.get_shapelets">[docs]</a>    <span class="k">def</span> <span class="nf">get_shapelets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;An accessor method to return the extracted shapelets</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        shapelets: a list of Shapelet objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapelets</span></div>
+
+<div class="viewcode-block" id="RandomShapeletTransform.calc_info_gain"><a class="viewcode-back" href="../../../autogen/sktime.transformers.shapelets.html#sktime.transformers.shapelets.RandomShapeletTransform.calc_info_gain">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">calc_info_gain</span><span class="p">(</span><span class="n">orderline</span><span class="p">,</span> <span class="n">class_counts</span><span class="p">,</span> <span class="n">total</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A static method to calculate the information gain of a candidate shapelet</span>
+<span class="sd">        when given an orderline and class distribution of distances to a dataset.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        orderline: pandas DataFrame</span>
+<span class="sd">            The input dataframe to transform</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        output: pandas DataFrame</span>
+<span class="sd">            The transformed dataframe in tabular format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="n">ent_class_counts</span><span class="p">,</span> <span class="n">all_class_count</span><span class="p">):</span>
+            <span class="n">ent</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">class_val</span> <span class="ow">in</span> <span class="n">ent_class_counts</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">ent_class_counts</span><span class="p">[</span><span class="n">class_val</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">ent</span> <span class="o">-=</span> <span class="n">ent_class_counts</span><span class="p">[</span><span class="n">class_val</span><span class="p">]</span><span class="o">/</span><span class="n">all_class_count</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">ent_class_counts</span><span class="p">[</span><span class="n">class_val</span><span class="p">]</span><span class="o">/</span><span class="n">all_class_count</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ent</span>
+
+        <span class="n">less_counts</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">class_counts</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="n">more_counts</span> <span class="o">=</span> <span class="n">class_counts</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">initial_ent</span> <span class="o">=</span> <span class="n">entropy</span><span class="p">(</span><span class="n">class_counts</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+
+        <span class="n">max_ig</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">orderline</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">next_class</span> <span class="o">=</span> <span class="n">orderline</span><span class="p">[</span><span class="n">split</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">less_counts</span><span class="p">[</span><span class="n">next_class</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">more_counts</span><span class="p">[</span><span class="n">next_class</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+
+            <span class="n">left_prop</span> <span class="o">=</span> <span class="p">(</span><span class="n">split</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">total</span>
+            <span class="n">ent_left</span> <span class="o">=</span> <span class="n">entropy</span><span class="p">(</span><span class="n">less_counts</span><span class="p">,</span> <span class="n">split</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">right_prop</span> <span class="o">=</span> <span class="p">(</span><span class="n">total</span><span class="o">-</span><span class="p">(</span><span class="n">split</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="n">total</span>
+            <span class="n">ent_right</span> <span class="o">=</span> <span class="n">entropy</span><span class="p">(</span><span class="n">more_counts</span><span class="p">,</span> <span class="n">total</span><span class="o">-</span><span class="p">(</span><span class="n">split</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+
+            <span class="n">together</span> <span class="o">=</span> <span class="n">initial_ent</span> <span class="o">-</span> <span class="p">(</span><span class="n">left_prop</span><span class="o">*</span><span class="n">ent_left</span> <span class="o">+</span> <span class="n">right_prop</span><span class="o">*</span><span class="n">ent_right</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">together</span> <span class="o">&gt;</span> <span class="n">max_ig</span><span class="p">:</span>
+                <span class="n">max_ig</span> <span class="o">=</span> <span class="n">together</span>
+
+        <span class="k">return</span> <span class="n">max_ig</span></div>
+
+<div class="viewcode-block" id="RandomShapeletTransform.zscore"><a class="viewcode-back" href="../../../autogen/sktime.transformers.shapelets.html#sktime.transformers.shapelets.RandomShapeletTransform.zscore">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">zscore</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; A static method to return the normalised version of series.  This mirrors the scipy implementation</span>
+<span class="sd">        with a small difference - rather than allowing /0, the function returns output = np.zeroes(len(input)).</span>
+<span class="sd">        This is to allow for sensible processing of candidate shapelets/comparison subseries that are a straight</span>
+<span class="sd">        line. Original version: https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.zscore.html</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        a : array_like</span>
+<span class="sd">            An array like object containing the sample data.</span>
+
+<span class="sd">        axis : int or None, optional</span>
+<span class="sd">            Axis along which to operate. Default is 0. If None, compute over the whole array a.</span>
+
+<span class="sd">        ddof : int, optional</span>
+<span class="sd">            Degrees of freedom correction in the calculation of the standard deviation. Default is 0.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        zscore : array_like</span>
+<span class="sd">            The z-scores, standardized by mean and standard deviation of input array a.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">sstd</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">)</span>
+
+        <span class="c1"># special case - if shapelet is a straight line (i.e. no variance), zscore ver should be np.zeroes(len(a))</span>
+        <span class="k">if</span> <span class="n">sstd</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+
+        <span class="n">mns</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">axis</span> <span class="ow">and</span> <span class="n">mns</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="n">a</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">((</span><span class="n">a</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">mns</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">))</span> <span class="o">/</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">sstd</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">mns</span><span class="p">)</span> <span class="o">/</span> <span class="n">sstd</span></div></div>
+
+
+<div class="viewcode-block" id="ContractedRandomShapeletTransform"><a class="viewcode-back" href="../../../autogen/sktime.transformers.shapelets.html#sktime.transformers.shapelets.ContractedRandomShapeletTransform">[docs]</a><span class="k">class</span> <span class="nc">ContractedRandomShapeletTransform</span><span class="p">(</span><span class="n">RandomShapeletTransform</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Contracted Random Shapelet Transform (extends Random Shapelet Transform).</span>
+
+<span class="sd">    A transformer to extract shapelets from a training dataset, then transform any</span>
+<span class="sd">    passed dataset into primitives using each extracted shapelet. For k shapelets,</span>
+<span class="sd">    an input case q is transformed by calculating the distance from q to each shapelet</span>
+<span class="sd">    and the transformed output case is composed of k features, where the kth attribute</span>
+<span class="sd">    is the distance from q to the kth shapelet.</span>
+
+<span class="sd">    This implementation of the transform is based on the findings in [2]; it uses random</span>
+<span class="sd">    sampling of candidate shapelets, rather than a full enumeration of candidates as</span>
+<span class="sd">    originally proposed in [1], as it has been shown that there is no significant</span>
+<span class="sd">    decrease in accuracy but a significant reduction in runtime through this approach.</span>
+
+<span class="sd">    There are two versions of the transform: RandomShapeletTransform and</span>
+<span class="sd">    ContractedRandomShapeletTransform. For each training series visited, both</span>
+<span class="sd">    implementations assess a specified number of candidate shapelets per series. However,</span>
+<span class="sd">    this version uses a contracted time limit; it visits a series, extracts an explict</span>
+<span class="sd">    number of shapelets, and then moves onto the next series. This continues until the</span>
+<span class="sd">    time limit is breached, and if the end of the data is reached first, the algorithm</span>
+<span class="sd">    will loop back round to the first series and extract the specified number of shapelets</span>
+<span class="sd">    again. The time limit is specified in minutes and is a lower-bound; if a shapelet is</span>
+<span class="sd">    being evaluated when the time limit is reached, it will complete before the extraction</span>
+<span class="sd">    process exits.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    min_shapelet_length : int (default = 3)</span>
+<span class="sd">        The minimum candidate shapelet length</span>
+<span class="sd">    max_shapelet_length :int (default = np.inf)</span>
+<span class="sd">        The maximum candidate shapelet length (default = np.inf). This value is</span>
+<span class="sd">        an upper-bound and is automatically capped to the series length if the</span>
+<span class="sd">        specified value exceeds the length of the shapelet.</span>
+<span class="sd">    time_limit_in_mins: float (default = 60.0)</span>
+<span class="sd">        The contract time limit to continue shapelet extraction. This is a lower-bound as a</span>
+<span class="sd">        shapelet candidate will not be abandoned if the time limit runs out.</span>
+<span class="sd">    initial_num_shapelets_per_case: int (default = 15)</span>
+<span class="sd">        The number of shapelet candidates to evaluate per series in the fit method initially.</span>
+<span class="sd">        If there is sufficient time remaining on the contract after this number of shapelets</span>
+<span class="sd">        have been evaluated from all training series, the search will continue at the start</span>
+<span class="sd">        of the data and extract this many shapelets from each series again.</span>
+<span class="sd">    seed: int (default = 0)</span>
+<span class="sd">        To seed the shapelet discovery to ensure deterministic results across multiple runs</span>
+<span class="sd">    dim_to_use: int (default = 0)</span>
+<span class="sd">        Which dimension of the data to use</span>
+<span class="sd">    remove_self_similar: bool (default = True)</span>
+<span class="sd">        Whether to remove self-similar shapelets before transforming. A candidate shapelet</span>
+<span class="sd">        is considered to be self-similar to another candidate if they are taken from the</span>
+<span class="sd">        same dimension of the same training series. With this set to True, any overlapping</span>
+<span class="sd">        candidates will be removed to preserve the best candidate (i.e. highest info gain)</span>
+<span class="sd">    verbose: bool (default = False)</span>
+<span class="sd">        Whether to print information during shapelet extraction</span>
+<span class="sd">    use_binary_info_gain: bool (default = True)</span>
+<span class="sd">        Whether to use one-vs-all information gain (as in [2]) or consider each class</span>
+<span class="sd">        independently when calculating the information gain of a candidate (as in [1])</span>
+<span class="sd">    trim_shapelets: bool (default = True)</span>
+<span class="sd">        Whether to crop the final list of extracted shapelets to the top k. If specified,</span>
+<span class="sd">        this is an upper-bound; if less than k shapelets are found then this parameter will</span>
+<span class="sd">        have no effect</span>
+<span class="sd">    num_shapelets_to_trim_to: int (default = 200)</span>
+<span class="sd">        If trim_shapelets = True, this is the number of shapelets to trim to.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    shapelets: list of Shapelet objects</span>
+<span class="sd">        The list of extracted shapelets after fit is called (initially shapelets = None)</span>
+
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    [1] Hills, Jon, Jason Lines, Edgaras Baranauskas, James Mapp, and Anthony Bagnall.</span>
+<span class="sd">    &quot;Classification of time series by shapelet transformation.&quot; Data Mining and Knowledge</span>
+<span class="sd">    Discovery 28, no. 4 (2014): 851-881.</span>
+
+<span class="sd">    [2] Bostrom, Aaron, and Anthony Bagnall.</span>
+<span class="sd">    &quot;Binary shapelet transform for multiclass time series classification.&quot;</span>
+<span class="sd">    In Transactions on Large-Scale Data-and Knowledge-Centered Systems XXXII,</span>
+<span class="sd">    pp. 24-46. Springer, Berlin, Heidelberg, 2017.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">min_shapelet_length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                 <span class="n">max_shapelet_length</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+                 <span class="n">initial_num_shapelets_per_case</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+                 <span class="n">time_limit_in_mins</span> <span class="o">=</span> <span class="mf">60.0</span><span class="p">,</span>
+                 <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">dim_to_use</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">remove_self_similar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">use_binary_info_gain</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">trim_shapelets</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">num_shapelets_to_trim_to</span> <span class="o">=</span> <span class="mi">200</span>
+                 <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_limit_on</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_limit</span> <span class="o">=</span> <span class="mi">60</span><span class="o">*</span><span class="n">time_limit_in_mins</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_shapelet_length</span> <span class="o">=</span> <span class="n">min_shapelet_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_shapelet_length</span> <span class="o">=</span> <span class="n">max_shapelet_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_cases_to_sample</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_shapelets_to_sample_per_case</span> <span class="o">=</span> <span class="n">initial_num_shapelets_per_case</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_to_use</span> <span class="o">=</span> <span class="n">dim_to_use</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_self_similar</span> <span class="o">=</span> <span class="n">remove_self_similar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shapelets</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_binary_info_gain</span> <span class="o">=</span> <span class="n">use_binary_info_gain</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trim_shapelets</span> <span class="o">=</span> <span class="n">trim_shapelets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_shapelets_to_trim_to</span> <span class="o">=</span> <span class="n">num_shapelets_to_trim_to</span></div>
+
+
+<div class="viewcode-block" id="Shapelet"><a class="viewcode-back" href="../../../autogen/sktime.transformers.shapelets.html#sktime.transformers.shapelets.Shapelet">[docs]</a><span class="k">class</span> <span class="nc">Shapelet</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A simple class to model a Shapelet with associated information</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    series_id: int</span>
+<span class="sd">        The index of the series within the data (X) that was passed to fit.</span>
+<span class="sd">    start_pos: int</span>
+<span class="sd">        The starting position of the shapelet within the original series</span>
+<span class="sd">    length: int</span>
+<span class="sd">        The length of the shapelet</span>
+<span class="sd">    info_gain: flaot</span>
+<span class="sd">        The calculated information gain of this shapelet</span>
+<span class="sd">    data: array-like</span>
+<span class="sd">        The (z-normalised) data of this shapelet</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series_id</span><span class="p">,</span> <span class="n">start_pos</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">info_gain</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">series_id</span> <span class="o">=</span> <span class="n">series_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_pos</span> <span class="o">=</span> <span class="n">start_pos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info_gain</span> <span class="o">=</span> <span class="n">info_gain</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;series id: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">series_id</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, start_pos: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_pos</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, length: &quot;</span> \
+               <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, info_gain: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">info_gain</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Example usage&quot;&quot;&quot;</span>
+
+    <span class="n">dataset</span> <span class="o">=</span> <span class="s2">&quot;GunPoint&quot;</span>
+
+    <span class="n">train_x</span><span class="p">,</span> <span class="n">train_y</span> <span class="o">=</span> <span class="n">load_gunpoint_dataframe</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="s1">&#39;TRAIN&#39;</span><span class="p">)</span>
+    <span class="n">test_x</span><span class="p">,</span> <span class="n">test_y</span> <span class="o">=</span> <span class="n">load_gunpoint_dataframe</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="s1">&#39;TEST&#39;</span><span class="p">)</span>
+
+
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+        <span class="p">(</span><span class="s1">&#39;st&#39;</span><span class="p">,</span> <span class="n">ContractedRandomShapeletTransform</span><span class="p">(</span><span class="n">time_limit_in_mins</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">min_shapelet_length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_shapelet_length</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+                                                 <span class="n">initial_num_shapelets_per_case</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s1">&#39;rf&#39;</span><span class="p">,</span> <span class="n">RandomForestClassifier</span><span class="p">()),</span>
+    <span class="p">])</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_x</span><span class="p">,</span> <span class="n">train_y</span><span class="p">)</span>
+    <span class="n">end_build</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">preds</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_x</span><span class="p">)</span>
+    <span class="n">end_test</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Results:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Correct:&quot;</span><span class="p">)</span>
+    <span class="n">correct</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">preds</span> <span class="o">==</span> <span class="n">test_y</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">correct</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;/&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test_y</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">correct</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">test_y</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Timing:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">To build:   &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">end_build</span><span class="o">-</span><span class="n">start</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; secs&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">To predict: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">end_test</span><span class="o">-</span><span class="n">end_build</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; secs&quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

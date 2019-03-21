@@ -1,0 +1,442 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sktime.model_selection &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autogen/sktime.html">sktime package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../extension.html">Extension Guidelines</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>sktime.model_selection</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for sktime.model_selection</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">classes and functions for model validation</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">GridSearchCV</span> <span class="k">as</span> <span class="n">skGSCV</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">make_scorer</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">accuracy_score</span>
+<span class="kn">from</span> <span class="nn">sktime.regressors.base</span> <span class="k">import</span> <span class="n">BaseRegressor</span>
+<span class="kn">from</span> <span class="nn">sktime.classifiers.base</span> <span class="k">import</span> <span class="n">BaseClassifier</span>
+
+
+<div class="viewcode-block" id="GridSearchCV"><a class="viewcode-back" href="../../autogen/sktime.model_selection.html#sktime.model_selection.GridSearchCV">[docs]</a><span class="k">class</span> <span class="nc">GridSearchCV</span><span class="p">(</span><span class="n">skGSCV</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Exhaustive search over specified parameter values for an estimator.</span>
+<span class="sd">    Important members are fit, predict.</span>
+<span class="sd">    GridSearchCV implements a &quot;fit&quot; and a &quot;score&quot; method.</span>
+<span class="sd">    It also implements &quot;predict&quot;, &quot;predict_proba&quot;, &quot;decision_function&quot;,</span>
+<span class="sd">    &quot;transform&quot; and &quot;inverse_transform&quot; if they are implemented in the</span>
+<span class="sd">    estimator used.</span>
+<span class="sd">    The parameters of the estimator used to apply these methods are optimized</span>
+<span class="sd">    by cross-validated grid-search over a parameter grid.</span>
+<span class="sd">    Read more in the :ref:`User Guide &lt;grid_search&gt;`.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    estimator : estimator object.</span>
+<span class="sd">        This is assumed to implement the scikit-learn estimator interface.</span>
+<span class="sd">        Either estimator needs to provide a ``score`` function,</span>
+<span class="sd">        or ``scoring`` must be passed.</span>
+<span class="sd">    param_grid : dict or list of dictionaries</span>
+<span class="sd">        Dictionary with parameters names (string) as keys and lists of</span>
+<span class="sd">        parameter settings to try as values, or a list of such</span>
+<span class="sd">        dictionaries, in which case the grids spanned by each dictionary</span>
+<span class="sd">        in the list are explored. This enables searching over any sequence</span>
+<span class="sd">        of parameter settings.</span>
+<span class="sd">    scoring : string, callable, list/tuple, dict or None, default: None</span>
+<span class="sd">        A single string (see :ref:`scoring_parameter`) or a callable</span>
+<span class="sd">        (see :ref:`scoring`) to evaluate the predictions on the test set.</span>
+<span class="sd">        For evaluating multiple metrics, either give a list of (unique) strings</span>
+<span class="sd">        or a dict with names as keys and callables as values.</span>
+<span class="sd">        NOTE that when using custom scorers, each scorer should return a single</span>
+<span class="sd">        value. Metric functions returning a list/array of values can be wrapped</span>
+<span class="sd">        into multiple scorers that return one value each.</span>
+<span class="sd">        See :ref:`multimetric_grid_search` for an example.</span>
+<span class="sd">        If None, the estimator&#39;s default scorer (if available) is used.</span>
+<span class="sd">    fit_params : dict, optional</span>
+<span class="sd">        Parameters to pass to the fit method.</span>
+<span class="sd">        .. deprecated:: 0.19</span>
+<span class="sd">           ``fit_params`` as a constructor argument was deprecated in version</span>
+<span class="sd">           0.19 and will be removed in version 0.21. Pass fit parameters to</span>
+<span class="sd">           the ``fit`` method instead.</span>
+<span class="sd">    n_jobs : int or None, optional (default=None)</span>
+<span class="sd">        Number of jobs to run in parallel.</span>
+<span class="sd">        ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.</span>
+<span class="sd">        ``-1`` means using all processors. See :term:`Glossary &lt;n_jobs&gt;`</span>
+<span class="sd">        for more details.</span>
+<span class="sd">    pre_dispatch : int, or string, optional</span>
+<span class="sd">        Controls the number of jobs that get dispatched during parallel</span>
+<span class="sd">        execution. Reducing this number can be useful to avoid an</span>
+<span class="sd">        explosion of memory consumption when more jobs get dispatched</span>
+<span class="sd">        than CPUs can process. This parameter can be:</span>
+<span class="sd">            - None, in which case all the jobs are immediately</span>
+<span class="sd">              created and spawned. Use this for lightweight and</span>
+<span class="sd">              fast-running jobs, to avoid delays due to on-demand</span>
+<span class="sd">              spawning of the jobs</span>
+<span class="sd">            - An int, giving the exact number of total jobs that are</span>
+<span class="sd">              spawned</span>
+<span class="sd">            - A string, giving an expression as a function of n_jobs,</span>
+<span class="sd">              as in &#39;2*n_jobs&#39;</span>
+<span class="sd">    iid : boolean, default=&#39;warn&#39;</span>
+<span class="sd">        If True, return the average score across folds, weighted by the number</span>
+<span class="sd">        of samples in each test set. In this case, the data is assumed to be</span>
+<span class="sd">        identically distributed across the folds, and the loss minimized is</span>
+<span class="sd">        the total loss per sample, and not the mean loss across the folds. If</span>
+<span class="sd">        False, return the average score across folds. Default is True, but</span>
+<span class="sd">        will change to False in version 0.21, to correspond to the standard</span>
+<span class="sd">        definition of cross-validation.</span>
+<span class="sd">        .. versionchanged:: 0.20</span>
+<span class="sd">            Parameter ``iid`` will change from True to False by default in</span>
+<span class="sd">            version 0.22, and will be removed in 0.24.</span>
+<span class="sd">    cv : int, cross-validation generator or an iterable, optional</span>
+<span class="sd">        Determines the cross-validation splitting strategy.</span>
+<span class="sd">        Possible inputs for cv are:</span>
+<span class="sd">        - None, to use the default 3-fold cross validation,</span>
+<span class="sd">        - integer, to specify the number of folds in a `(Stratified)KFold`,</span>
+<span class="sd">        - :term:`CV splitter`,</span>
+<span class="sd">        - An iterable yielding (train, test) splits as arrays of indices.</span>
+<span class="sd">        For integer/None inputs, if the estimator is a classifier and ``y`` is</span>
+<span class="sd">        either binary or multiclass, :class:`StratifiedKFold` is used. In all</span>
+<span class="sd">        other cases, :class:`KFold` is used.</span>
+<span class="sd">        Refer :ref:`User Guide &lt;cross_validation&gt;` for the various</span>
+<span class="sd">        cross-validation strategies that can be used here.</span>
+<span class="sd">        .. versionchanged:: 0.20</span>
+<span class="sd">            ``cv`` default value if None will change from 3-fold to 5-fold</span>
+<span class="sd">            in v0.22.</span>
+<span class="sd">    refit : boolean, or string, default=True</span>
+<span class="sd">        Refit an estimator using the best found parameters on the whole</span>
+<span class="sd">        dataset.</span>
+<span class="sd">        For multiple metric evaluation, this needs to be a string denoting the</span>
+<span class="sd">        scorer is used to find the best parameters for refitting the estimator</span>
+<span class="sd">        at the end.</span>
+<span class="sd">        The refitted estimator is made available at the ``best_estimator_``</span>
+<span class="sd">        attribute and permits using ``predict`` directly on this</span>
+<span class="sd">        ``GridSearchCV`` instance.</span>
+<span class="sd">        Also for multiple metric evaluation, the attributes ``best_index_``,</span>
+<span class="sd">        ``best_score_`` and ``best_params_`` will only be available if</span>
+<span class="sd">        ``refit`` is set and all of them will be determined w.r.t this specific</span>
+<span class="sd">        scorer.</span>
+<span class="sd">        See ``scoring`` parameter to know more about multiple metric</span>
+<span class="sd">        evaluation.</span>
+<span class="sd">    verbose : integer</span>
+<span class="sd">        Controls the verbosity: the higher, the more messages.</span>
+<span class="sd">    error_score : &#39;raise&#39; or numeric</span>
+<span class="sd">        Value to assign to the score if an error occurs in estimator fitting.</span>
+<span class="sd">        If set to &#39;raise&#39;, the error is raised. If a numeric value is given,</span>
+<span class="sd">        FitFailedWarning is raised. This parameter does not affect the refit</span>
+<span class="sd">        step, which will always raise the error. Default is &#39;raise&#39; but from</span>
+<span class="sd">        version 0.22 it will change to np.nan.</span>
+<span class="sd">    return_train_score : boolean, optional</span>
+<span class="sd">        If ``False``, the ``cv_results_`` attribute will not include training</span>
+<span class="sd">        scores.</span>
+<span class="sd">        Current default is ``&#39;warn&#39;``, which behaves as ``True`` in addition</span>
+<span class="sd">        to raising a warning when a training score is looked up.</span>
+<span class="sd">        That default will be changed to ``False`` in 0.21.</span>
+<span class="sd">        Computing training scores is used to get insights on how different</span>
+<span class="sd">        parameter settings impact the overfitting/underfitting trade-off.</span>
+<span class="sd">        However computing the scores on the training set can be computationally</span>
+<span class="sd">        expensive and is not strictly required to select the parameters that</span>
+<span class="sd">        yield the best generalization performance.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from sklearn import svm, datasets</span>
+<span class="sd">    &gt;&gt;&gt; from sklearn.model_selection import GridSearchCV</span>
+<span class="sd">    &gt;&gt;&gt; iris = datasets.load_iris()</span>
+<span class="sd">    &gt;&gt;&gt; parameters = {&#39;kernel&#39;:(&#39;linear&#39;, &#39;rbf&#39;), &#39;C&#39;:[1, 10]}</span>
+<span class="sd">    &gt;&gt;&gt; svc = svm.SVC(gamma=&quot;scale&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; clf = GridSearchCV(svc, parameters, cv=5)</span>
+<span class="sd">    &gt;&gt;&gt; clf.fit(iris.data, iris.target)</span>
+<span class="sd">    ...                             # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS</span>
+<span class="sd">    GridSearchCV(cv=5, error_score=...,</span>
+<span class="sd">           estimator=SVC(C=1.0, cache_size=..., class_weight=..., coef0=...,</span>
+<span class="sd">                         decision_function_shape=&#39;ovr&#39;, degree=..., gamma=...,</span>
+<span class="sd">                         kernel=&#39;rbf&#39;, max_iter=-1, probability=False,</span>
+<span class="sd">                         random_state=None, shrinking=True, tol=...,</span>
+<span class="sd">                         verbose=False),</span>
+<span class="sd">           fit_params=None, iid=..., n_jobs=None,</span>
+<span class="sd">           param_grid=..., pre_dispatch=..., refit=..., return_train_score=...,</span>
+<span class="sd">           scoring=..., verbose=...)</span>
+<span class="sd">    &gt;&gt;&gt; sorted(clf.cv_results_.keys())</span>
+<span class="sd">    ...                             # doctest: +NORMALIZE_WHITESPACE +ELLIPSIS</span>
+<span class="sd">    [&#39;mean_fit_time&#39;, &#39;mean_score_time&#39;, &#39;mean_test_score&#39;,...</span>
+<span class="sd">     &#39;mean_train_score&#39;, &#39;param_C&#39;, &#39;param_kernel&#39;, &#39;params&#39;,...</span>
+<span class="sd">     &#39;rank_test_score&#39;, &#39;split0_test_score&#39;,...</span>
+<span class="sd">     &#39;split0_train_score&#39;, &#39;split1_test_score&#39;, &#39;split1_train_score&#39;,...</span>
+<span class="sd">     &#39;split2_test_score&#39;, &#39;split2_train_score&#39;,...</span>
+<span class="sd">     &#39;std_fit_time&#39;, &#39;std_score_time&#39;, &#39;std_test_score&#39;, &#39;std_train_score&#39;...]</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cv_results_ : dict of numpy (masked) ndarrays</span>
+<span class="sd">        A dict with keys as column headers and values as columns, that can be</span>
+<span class="sd">        imported into a pandas ``DataFrame``.</span>
+<span class="sd">        For instance the below given table</span>
+
+<span class="sd">        +------------+-----------+------------+-----------------+---+---------+</span>
+<span class="sd">        |param_kernel|param_gamma|param_degree|split0_test_score|...|rank_t...|</span>
+<span class="sd">        +============+===========+============+=================+===+=========+</span>
+<span class="sd">        |  &#39;poly&#39;    |     --    |      2     |       0.80      |...|    2    |</span>
+<span class="sd">        +------------+-----------+------------+-----------------+---+---------+</span>
+<span class="sd">        |  &#39;poly&#39;    |     --    |      3     |       0.70      |...|    4    |</span>
+<span class="sd">        +------------+-----------+------------+-----------------+---+---------+</span>
+<span class="sd">        |  &#39;rbf&#39;     |     0.1   |     --     |       0.80      |...|    3    |</span>
+<span class="sd">        +------------+-----------+------------+-----------------+---+---------+</span>
+<span class="sd">        |  &#39;rbf&#39;     |     0.2   |     --     |       0.93      |...|    1    |</span>
+<span class="sd">        +------------+-----------+------------+-----------------+---+---------+</span>
+
+<span class="sd">        will be represented by a ``cv_results_`` dict of::</span>
+<span class="sd">            {</span>
+<span class="sd">            &#39;param_kernel&#39;: masked_array(data = [&#39;poly&#39;, &#39;poly&#39;, &#39;rbf&#39;, &#39;rbf&#39;],</span>
+<span class="sd">                                         mask = [False False False False]...)</span>
+<span class="sd">            &#39;param_gamma&#39;: masked_array(data = [-- -- 0.1 0.2],</span>
+<span class="sd">                                        mask = [ True  True False False]...),</span>
+<span class="sd">            &#39;param_degree&#39;: masked_array(data = [2.0 3.0 -- --],</span>
+<span class="sd">                                         mask = [False False  True  True]...),</span>
+<span class="sd">            &#39;split0_test_score&#39;  : [0.80, 0.70, 0.80, 0.93],</span>
+<span class="sd">            &#39;split1_test_score&#39;  : [0.82, 0.50, 0.70, 0.78],</span>
+<span class="sd">            &#39;mean_test_score&#39;    : [0.81, 0.60, 0.75, 0.85],</span>
+<span class="sd">            &#39;std_test_score&#39;     : [0.01, 0.10, 0.05, 0.08],</span>
+<span class="sd">            &#39;rank_test_score&#39;    : [2, 4, 3, 1],</span>
+<span class="sd">            &#39;split0_train_score&#39; : [0.80, 0.92, 0.70, 0.93],</span>
+<span class="sd">            &#39;split1_train_score&#39; : [0.82, 0.55, 0.70, 0.87],</span>
+<span class="sd">            &#39;mean_train_score&#39;   : [0.81, 0.74, 0.70, 0.90],</span>
+<span class="sd">            &#39;std_train_score&#39;    : [0.01, 0.19, 0.00, 0.03],</span>
+<span class="sd">            &#39;mean_fit_time&#39;      : [0.73, 0.63, 0.43, 0.49],</span>
+<span class="sd">            &#39;std_fit_time&#39;       : [0.01, 0.02, 0.01, 0.01],</span>
+<span class="sd">            &#39;mean_score_time&#39;    : [0.01, 0.06, 0.04, 0.04],</span>
+<span class="sd">            &#39;std_score_time&#39;     : [0.00, 0.00, 0.00, 0.01],</span>
+<span class="sd">            &#39;params&#39;             : [{&#39;kernel&#39;: &#39;poly&#39;, &#39;degree&#39;: 2}, ...],</span>
+<span class="sd">            }</span>
+<span class="sd">        NOTE</span>
+<span class="sd">        The key ``&#39;params&#39;`` is used to store a list of parameter</span>
+<span class="sd">        settings dicts for all the parameter candidates.</span>
+<span class="sd">        The ``mean_fit_time``, ``std_fit_time``, ``mean_score_time`` and</span>
+<span class="sd">        ``std_score_time`` are all in seconds.</span>
+<span class="sd">        For multi-metric evaluation, the scores for all the scorers are</span>
+<span class="sd">        available in the ``cv_results_`` dict at the keys ending with that</span>
+<span class="sd">        scorer&#39;s name (``&#39;_&lt;scorer_name&gt;&#39;``) instead of ``&#39;_score&#39;`` shown</span>
+<span class="sd">        above. (&#39;split0_test_precision&#39;, &#39;mean_train_precision&#39; etc.)</span>
+<span class="sd">    best_estimator_ : estimator or dict</span>
+<span class="sd">        Estimator that was chosen by the search, i.e. estimator</span>
+<span class="sd">        which gave highest score (or smallest loss if specified)</span>
+<span class="sd">        on the left out data. Not available if ``refit=False``.</span>
+<span class="sd">        See ``refit`` parameter for more information on allowed values.</span>
+<span class="sd">    best_score_ : float</span>
+<span class="sd">        Mean cross-validated score of the best_estimator</span>
+<span class="sd">        For multi-metric evaluation, this is present only if ``refit`` is</span>
+<span class="sd">        specified.</span>
+<span class="sd">    best_params_ : dict</span>
+<span class="sd">        Parameter setting that gave the best results on the hold out data.</span>
+<span class="sd">        For multi-metric evaluation, this is present only if ``refit`` is</span>
+<span class="sd">        specified.</span>
+<span class="sd">    best_index_ : int</span>
+<span class="sd">        The index (of the ``cv_results_`` arrays) which corresponds to the best</span>
+<span class="sd">        candidate parameter setting.</span>
+<span class="sd">        The dict at ``search.cv_results_[&#39;params&#39;][search.best_index_]`` gives</span>
+<span class="sd">        the parameter setting for the best model, that gives the highest</span>
+<span class="sd">        mean score (``search.best_score_``).</span>
+<span class="sd">        For multi-metric evaluation, this is present only if ``refit`` is</span>
+<span class="sd">        specified.</span>
+<span class="sd">    scorer_ : function or a dict</span>
+<span class="sd">        Scorer function used on the held out data to choose the best</span>
+<span class="sd">        parameters for the model.</span>
+<span class="sd">        For multi-metric evaluation, this attribute holds the validated</span>
+<span class="sd">        ``scoring`` dict which maps the scorer key to the scorer callable.</span>
+<span class="sd">    n_splits_ : int</span>
+<span class="sd">        The number of cross-validation splits (folds/iterations).</span>
+<span class="sd">    refit_time_ : float</span>
+<span class="sd">        Seconds used for refitting the best model on the whole dataset.</span>
+<span class="sd">        This is present only if ``refit`` is not False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">n_jobs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iid</span><span class="o">=</span><span class="s1">&#39;warn&#39;</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="s1">&#39;warn&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">pre_dispatch</span><span class="o">=</span><span class="s1">&#39;2*n_jobs&#39;</span><span class="p">,</span> <span class="n">error_score</span><span class="o">=</span><span class="s1">&#39;raise-deprecating&#39;</span><span class="p">,</span>
+                 <span class="n">return_train_score</span><span class="o">=</span><span class="s2">&quot;warn&quot;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">n_jobs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iid</span><span class="o">=</span><span class="s1">&#39;warn&#39;</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="s1">&#39;warn&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">pre_dispatch</span><span class="o">=</span><span class="s1">&#39;2*n_jobs&#39;</span><span class="p">,</span> <span class="n">error_score</span><span class="o">=</span><span class="s1">&#39;raise-deprecating&#39;</span><span class="p">,</span>
+                 <span class="n">return_train_score</span><span class="o">=</span><span class="s2">&quot;warn&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scoring</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># using accuracy score as default for classifiers</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">BaseClassifier</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scoring</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">accuracy_score</span><span class="p">)</span>
+            <span class="c1"># using mean squared error as default for regressors</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">BaseRegressor</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scoring</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">mean_squared_error</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

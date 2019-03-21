@@ -1,0 +1,7 @@
+sktime.regressors.example\_regressors module
+============================================
+
+.. automodule:: sktime.regressors.example_regressors
+    :members:
+    :undoc-members:
+    :show-inheritance:

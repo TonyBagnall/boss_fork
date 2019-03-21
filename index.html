@@ -1,0 +1,324 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Welcome to sktime’s documentation! &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="sktime package" href="autogen/sktime.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="autogen/sktime.html">sktime package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extension.html">Extension Guidelines</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>Welcome to sktime’s documentation!</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="welcome-to-sktime-s-documentation">
+<h1>Welcome to sktime’s documentation!<a class="headerlink" href="#welcome-to-sktime-s-documentation" title="Permalink to this headline">¶</a></h1>
+<a class="reference external image-reference" href="https://travis-ci.com/alan-turing-institute/sktime"><img alt="https://travis-ci.com/alan-turing-institute/sktime.svg?token=kTo6WTfr4f458q1WzPCH&amp;branch=master" src="https://travis-ci.com/alan-turing-institute/sktime.svg?token=kTo6WTfr4f458q1WzPCH&amp;branch=master" /></a>
+</div>
+<div class="section" id="sktime">
+<h1>sktime<a class="headerlink" href="#sktime" title="Permalink to this headline">¶</a></h1>
+<p>A <a class="reference external" href="https://github.com/scikit-learn/scikit-learn">scikit-learn</a> compatible Python toolbox for learning with
+time series and panel data. Eventually, we would like to support:</p>
+<ul class="simple">
+<li>Time series classification and regression,</li>
+<li>Classical forecasting,</li>
+<li>Supervised/panel forecasting,</li>
+<li>Time series segmentation,</li>
+<li>Time-to-event and event risk modelling,</li>
+<li>Unsupervised tasks such as motif discovery and anomaly detection, and diagnostic visualization,</li>
+<li>On-line and streaming tasks, e.g., in variation of the above.</li>
+</ul>
+<p>The package is under active development. Development takes place in the <a class="reference external" href="https://github.com/alan-turing-institute/sktime">sktime</a> repository on Github.</p>
+<p>Currently, modular modelling workflows for supervised learning with time series have been implemented.
+As next steps, we will move to forecasting and integration of a modified <a class="reference external" href="https://github.com/alan-turing-institute/pysf/">pysf</a> interface for forecasting and supervised forecasting.</p>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>The package is currently not feature stable, and thus not available directly via PyPI. In the interim, please follow these steps to install the development version:</p>
+<ol class="arabic simple">
+<li>Download the repository if you have not done so already: <code class="code docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/alan-turing-institute/sktime.git</span></code></li>
+<li>Move into the root directory: <code class="code docutils literal notranslate"><span class="pre">cd</span> <span class="pre">sktime</span></code></li>
+<li>Make sure your local version is up-to-date: <code class="code docutils literal notranslate"><span class="pre">git</span> <span class="pre">pull</span></code></li>
+<li>Optionally, activate destination environment for package, e.g. with conda: <code class="code docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">&lt;env&gt;</span></code></li>
+<li>Install package: <code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span></code></li>
+</ol>
+</div>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="high-level-interface">
+<h3>High-level interface<a class="headerlink" href="#high-level-interface" title="Permalink to this headline">¶</a></h3>
+<p>There are numerous different time series data related learning tasks, for example</p>
+<ul class="simple">
+<li>Time series classification and regression,</li>
+<li>Classical forecasting,</li>
+<li>Supervised/panel forecasting,</li>
+<li>Time series segmentation.</li>
+</ul>
+<p>The sktime high-level interface aims to create a unified interface for these different learning tasks (partially inspired by the APIs of mlr and openML) through the following two objects:</p>
+<ul class="simple">
+<li><code class="code docutils literal notranslate"><span class="pre">Task</span></code> object that encapsulates meta-data from a dataset and the necessary information about the particular supervised learning task, e.g. the instructions on how to derive the target/labels for classification from the data,</li>
+<li><code class="code docutils literal notranslate"><span class="pre">Strategy</span></code> objects that wrap low-level estimators and allows to use <code class="code docutils literal notranslate"><span class="pre">fit</span></code> and <code class="code docutils literal notranslate"><span class="pre">predict</span></code> methods using data and a task object.</li>
+</ul>
+</div>
+<div class="section" id="low-level-interface">
+<h3>Low-level interface<a class="headerlink" href="#low-level-interface" title="Permalink to this headline">¶</a></h3>
+<p>The low-level interface extends the standard scikit-learn API to handle time series and panel data.
+Currently, the package implements:</p>
+<ul class="simple">
+<li>Various state-of-the-art approaches to supervised learning with time series features,</li>
+<li>Transformation of time series, including series-to-series transforms (e.g. Fourier transform), series-to-primitives transforms aka feature extractors, (e.g. mean, variance), sub-divided into fittables (on table) and row-wise applicates,</li>
+<li>Pipelining, allowing to chain multiple transformers with a final estimator,</li>
+<li>Meta-learning strategies including tuning and ensembling, accepting pipelines as the base estimator,</li>
+<li>Off-shelf composites strategies, such as a fully customisable random forest for time-series classification, with interval segmentation and feature extraction.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<p>The full API documentation and an introduction can be found <a class="reference external" href="https://alan-turing-institute.github.io/sktime/">here</a>.
+Tutorial notebooks for currently stable functionality are <a class="reference external" href="https://github.com/alan-turing-institute/sktime/tree/master/examples">here</a>.</p>
+</div>
+<div class="section" id="development-road-map">
+<h2>Development road map<a class="headerlink" href="#development-road-map" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Functionality for the advanced time series tasks. For (supervised) forecasting, integration of a modified <a class="reference external" href="https://github.com/alan-turing-institute/pysf/">pysf</a> interface. For time-to-event and event risk modell, integration of an adapted <a class="reference external" href="https://github.com/alan-turing-institute/skpro/">pysf</a> interface.</li>
+<li>Extension of high-level interface to classical and supervised/panel forecasting, to include reduction strategies in which forecasting or supervised forecasting tasks are reduced to tasks that can be solved with classical supervised learning algorithms or time series classification/regression,</li>
+<li>Integration of algorithms for classical forecasting (e.g. ARIMA), deep learning strategies, and third-party feature extraction tools,</li>
+<li>Design and implementation of specialised data-container for efficient handling of time series/panel data in a supervised learning workflow and separation of time series meta-data, re-utilising existing data-containers whenever possible,</li>
+<li>Automated benchmarking functionality including orchestration of experiments and post-hoc evaluation methods, based on the <a class="reference external" href="https://github.com/alan-turing-institute/pysf/">mlaut</a> design.</li>
+</ol>
+</div>
+<div class="section" id="contributors">
+<h2>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h2>
+<p>Former and current active contributors are as follows.</p>
+<p>Project management: Jason Lines (&#64;jasonlines), Franz J Kiraly (&#64;fkiraly)</p>
+<p>Design: Anthony Bagnall, Sajaysurya Ganesh (&#64;sajaysurya), Jason Lines (&#64;jasonlines), Viktor Kazakov (&#64;viktorkaz), Franz J Kiraly (&#64;fkiraly), Markus Löning (&#64;mloning)</p>
+<p>Coding: Sajaysurya Ganesh (&#64;sajaysurya), Jason Lines (&#64;jasonlines), Viktor Kazakov (&#64;viktorkaz), Markus Löning (&#64;mloning)</p>
+<p>We are actively looking for contributors. Please contact &#64;fkiraly or &#64;jasonlines for volunteering or information on paid opportunities, or simply raise an issue in the tracker.</p>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="autogen/sktime.html">sktime package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extension.html">Extension Guidelines</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="autogen/sktime.html" class="btn btn-neutral float-right" title="sktime package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

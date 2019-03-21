@@ -1,0 +1,7 @@
+sktime.transformers.series\_to\_tabular module
+==============================================
+
+.. automodule:: sktime.transformers.series_to_tabular
+    :members:
+    :undoc-members:
+    :show-inheritance:

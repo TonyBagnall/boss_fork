@@ -1,0 +1,17 @@
+sktime.classifiers package
+==========================
+
+.. automodule:: sktime.classifiers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+
+   sktime.classifiers.base
+   sktime.classifiers.ensemble
+   sktime.classifiers.example_classifiers
+

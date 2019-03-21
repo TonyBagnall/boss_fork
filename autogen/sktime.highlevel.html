@@ -1,0 +1,376 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sktime.highlevel module &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sktime.model_selection module" href="sktime.model_selection.html" />
+    <link rel="prev" title="sktime.transformers.shapelets module" href="sktime.transformers.shapelets.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="sktime.html">sktime package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="sktime.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="sktime.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">sktime.highlevel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sktime.model_selection.html">sktime.model_selection module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sktime.pipeline.html">sktime.pipeline module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extension.html">Extension Guidelines</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="sktime.html">sktime package</a> &raquo;</li>
+        
+      <li>sktime.highlevel module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autogen/sktime.highlevel.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-sktime.highlevel">
+<span id="sktime-highlevel-module"></span><h1>sktime.highlevel module<a class="headerlink" href="#module-sktime.highlevel" title="Permalink to this headline">¶</a></h1>
+<p>A Helper interface for high level operations</p>
+<p>Implements the Task and Strategy classes for
+high level operations</p>
+<dl class="class">
+<dt id="sktime.highlevel.BaseStrategy">
+<em class="property">class </em><code class="descclassname">sktime.highlevel.</code><code class="descname">BaseStrategy</code><span class="sig-paren">(</span><em>estimator</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/highlevel.html#BaseStrategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.highlevel.BaseStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A meta-estimator that employs a low level estimator to
+perform a pescribed task</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>estimator</strong> (<em>BaseEstimator</em>) – An instance of an appropriately initialized
+low-level estimator</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="sktime.highlevel.BaseStrategy.case">
+<code class="descname">case</code><a class="headerlink" href="#sktime.highlevel.BaseStrategy.case" title="Permalink to this definition">¶</a></dt>
+<dd><p>exposes the private variable _case as read only</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sktime.highlevel.BaseStrategy.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>task</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/highlevel.html#BaseStrategy.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.highlevel.BaseStrategy.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the estimator as per task details</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>task</strong> (<a class="reference internal" href="#sktime.highlevel.Task" title="sktime.highlevel.Task"><em>Task</em></a>) – A task initialized with the same kind of data</li>
+<li><strong>data</strong> (<em>pd.DataFrame</em>) – Training Data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>self</strong> – returns the predictions</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">the instance being fitted</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sktime.highlevel.BaseStrategy.get_params">
+<code class="descname">get_params</code><span class="sig-paren">(</span><em>deep=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/highlevel.html#BaseStrategy.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.highlevel.BaseStrategy.get_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>calls get_params of the estimator</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sktime.highlevel.BaseStrategy.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/highlevel.html#BaseStrategy.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.highlevel.BaseStrategy.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict the targets for the test data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>a pandas DataFrame</em>) – Prediction Data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>predictions</strong> – returns the predictions</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">a pd.Dataframe or pd.Series</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sktime.highlevel.BaseStrategy.set_params">
+<code class="descname">set_params</code><span class="sig-paren">(</span><em>**params</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/highlevel.html#BaseStrategy.set_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.highlevel.BaseStrategy.set_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>calls set_params of the estimator</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sktime.highlevel.TSCStrategy">
+<em class="property">class </em><code class="descclassname">sktime.highlevel.</code><code class="descname">TSCStrategy</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/highlevel.html#TSCStrategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.highlevel.TSCStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sktime.highlevel.BaseStrategy" title="sktime.highlevel.BaseStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">sktime.highlevel.BaseStrategy</span></code></a></p>
+<p>Strategies for Time Series Classification</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sktime.highlevel.TSRStrategy">
+<em class="property">class </em><code class="descclassname">sktime.highlevel.</code><code class="descname">TSRStrategy</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/highlevel.html#TSRStrategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.highlevel.TSRStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sktime.highlevel.BaseStrategy" title="sktime.highlevel.BaseStrategy"><code class="xref py py-class docutils literal notranslate"><span class="pre">sktime.highlevel.BaseStrategy</span></code></a></p>
+<p>Strategies for Time Series Regression</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="sktime.highlevel.Task">
+<em class="property">class </em><code class="descclassname">sktime.highlevel.</code><code class="descname">Task</code><span class="sig-paren">(</span><em>case</em>, <em>data</em>, <em>target</em>, <em>features=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/highlevel.html#Task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.highlevel.Task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>An object that encapsulates meta-data and instructions on how to derive the target/label for the time-series
+prediction/supervised learning task.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>case</strong> (<em>string</em>) – The string value could be either “TSC” for time series
+classification of “TSR” for time series regression.</li>
+<li><strong>data</strong> (<em>pd.DataFrame</em>) – Contains the data that the task is expected to work with.</li>
+<li><strong>target</strong> (<em>string</em>) – The column header for the target variable to be predicted.</li>
+<li><strong>features</strong> (<em>list of string</em>) – The column header for the target variable to be predicted.
+If omitted, every column apart from target would be a feature.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="sktime.highlevel.Task.case">
+<code class="descname">case</code><a class="headerlink" href="#sktime.highlevel.Task.case" title="Permalink to this definition">¶</a></dt>
+<dd><p>exposes the private variable _case as read only</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sktime.highlevel.Task.features">
+<code class="descname">features</code><a class="headerlink" href="#sktime.highlevel.Task.features" title="Permalink to this definition">¶</a></dt>
+<dd><p>exposes the private variable _features in a controlled way</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sktime.highlevel.Task.target">
+<code class="descname">target</code><a class="headerlink" href="#sktime.highlevel.Task.target" title="Permalink to this definition">¶</a></dt>
+<dd><p>exposes the private variable _target in a controlled way</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sktime.model_selection.html" class="btn btn-neutral float-right" title="sktime.model_selection module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="sktime.transformers.shapelets.html" class="btn btn-neutral float-left" title="sktime.transformers.shapelets module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

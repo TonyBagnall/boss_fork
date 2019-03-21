@@ -1,0 +1,399 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sktime.datasets.base &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../autogen/sktime.html">sktime package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extension.html">Extension Guidelines</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>sktime.datasets.base</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for sktime.datasets.base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;Utilities for loading toy datasets for testing</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sktime.utils.load_data</span> <span class="k">import</span> <span class="n">load_from_tsfile_to_dataframe</span>
+
+
+<div class="viewcode-block" id="read_single_series_data"><a class="viewcode-back" href="../../../autogen/sktime.datasets.base.html#sktime.datasets.base.read_single_series_data">[docs]</a><span class="k">def</span> <span class="nf">read_single_series_data</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;reads data from the supplied file</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file    : pre-opended file object</span>
+<span class="sd">        the file to be read from</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    X       : A pandas DataFrame containing the time-series features</span>
+<span class="sd">    y       : A pandas Series containing the targets</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;  &#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_gunpoint"><a class="viewcode-back" href="../../../autogen/sktime.datasets.base.html#sktime.datasets.base.load_gunpoint">[docs]</a><span class="k">def</span> <span class="nf">load_gunpoint</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="s1">&#39;TRAIN&#39;</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Loads the gunpoint dataset as a pandas DataFrame</span>
+
+<span class="sd">    This dataset involves one female actor and one male actor making a</span>
+<span class="sd">    motion with their hand. The two classes are: Gun-Draw and Point:</span>
+<span class="sd">    For Gun-Draw the actors have their hands by their sides. They draw</span>
+<span class="sd">    a replicate gun from a hip-mounted holster, point it at a target</span>
+<span class="sd">    for approximately one second, then return the gun to the holster,</span>
+<span class="sd">    and their hands to their sides. For Point the actors have their gun</span>
+<span class="sd">    by their sides. They point with their index fingers to a target for</span>
+<span class="sd">    approximately one second, and then return their hands to their</span>
+<span class="sd">    sides. For both classes, we tracked the centroid of the actor&#39;s</span>
+<span class="sd">    right hands in both X- and Y-axes, which appear to be highly</span>
+<span class="sd">    correlated. The data in the archive is just the X-axis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    split       : string (either &quot;TRAIN&quot; or &quot;TEST&quot;</span>
+<span class="sd">        takes the default value &quot;TRAIN&quot;. Used to specify the appropriate</span>
+<span class="sd">        part of the dataset to be loaded.</span>
+<span class="sd">    return_X_y  : bool</span>
+<span class="sd">        If True, returns the features and target separately, each as pd.Series</span>
+<span class="sd">        If False, returns both features and target in one DataFrame</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    X       : A pandas Series containing the time-series features</span>
+<span class="sd">        Each entry in the series is a timeseries object</span>
+<span class="sd">    y       : A pandas Series containing the targets</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">module_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+    <span class="n">dname</span> <span class="o">=</span> <span class="s1">&#39;data&#39;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;GunPoint_&#39;</span><span class="o">+</span><span class="n">split</span><span class="o">+</span><span class="s1">&#39;.txt&#39;</span>
+    <span class="n">abspath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">module_path</span><span class="p">,</span> <span class="n">dname</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">read_single_series_data</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="c1"># remove the target before wrapping with series</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="c1"># create series of series</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">itertuples</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)])</span>
+    <span class="c1"># set names for both series</span>
+    <span class="n">y</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;label&#39;</span>
+    <span class="n">X</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;x_axis&#39;</span>
+    <span class="c1"># return as per user request</span>
+    <span class="k">if</span> <span class="n">return_X_y</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="load_gunpoint_dataframe"><a class="viewcode-back" href="../../../autogen/sktime.datasets.base.html#sktime.datasets.base.load_gunpoint_dataframe">[docs]</a><span class="k">def</span> <span class="nf">load_gunpoint_dataframe</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="s1">&#39;TRAIN&#39;</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Loads the GunPoint time series classification problem and returns X and y</span>
+
+<span class="sd">    Dimensionality:     univariate</span>
+<span class="sd">    Series length:      150</span>
+<span class="sd">    Train cases:        50</span>
+<span class="sd">    Test cases:         150</span>
+<span class="sd">    Number of classes:  2</span>
+
+<span class="sd">    This dataset involves one female actor and one male actor making a motion with their</span>
+<span class="sd">    hand. The two classes are: Gun-Draw and Point: For Gun-Draw the actors have their</span>
+<span class="sd">    hands by their sides. They draw a replicate gun from a hip-mounted holster, point it</span>
+<span class="sd">    at a target for approximately one second, then return the gun to the holster, and</span>
+<span class="sd">    their hands to their sides. For Point the actors have their gun by their sides.</span>
+<span class="sd">    They point with their index fingers to a target for approximately one second, and</span>
+<span class="sd">    then return their hands to their sides. For both classes, we tracked the centroid</span>
+<span class="sd">    of the actor&#39;s right hands in both X- and Y-axes, which appear to be highly</span>
+<span class="sd">    correlated. The data in the archive is just the X-axis.</span>
+
+<span class="sd">    Dataset details: http://timeseriesclassification.com/description.php?Dataset=GunPoint</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    split: string (either &quot;TRAIN&quot; or &quot;TEST&quot;, default = &#39;TRAIN&#39;)</span>
+<span class="sd">        Whether to load the default train or test partition of the problem</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    X: pandas DataFrame with m rows and c columns</span>
+<span class="sd">        The time series data for the problem with m cases and c dimensions</span>
+<span class="sd">    y: numpy array</span>
+<span class="sd">        The class labels for each case in X</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">module_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+    <span class="n">dname</span> <span class="o">=</span> <span class="s1">&#39;data&#39;</span>
+    <span class="n">pname</span> <span class="o">=</span> <span class="s1">&#39;GunPoint&#39;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">pname</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">split</span><span class="o">+</span><span class="s1">&#39;.ts&#39;</span>
+    <span class="n">abspath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">module_path</span><span class="p">,</span> <span class="n">dname</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_from_tsfile_to_dataframe</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_X_y</span><span class="p">:</span>
+        <span class="n">X</span><span class="p">[</span><span class="s1">&#39;class_val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="load_italy_power_demand_dataframe"><a class="viewcode-back" href="../../../autogen/sktime.datasets.base.html#sktime.datasets.base.load_italy_power_demand_dataframe">[docs]</a><span class="k">def</span> <span class="nf">load_italy_power_demand_dataframe</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="s1">&#39;TRAIN&#39;</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads the ItalyPowerDemand time series classification problem and returns X and y</span>
+
+<span class="sd">    Dimensionality:     univariate</span>
+<span class="sd">    Series length:      24</span>
+<span class="sd">    Train cases:        67</span>
+<span class="sd">    Test cases:         1029</span>
+<span class="sd">    Number of classes:  2</span>
+
+<span class="sd">    The data was derived from twelve monthly electrical power demand time series from Italy and</span>
+<span class="sd">    first used in the paper &quot;Intelligent Icons: Integrating Lite-Weight Data Mining and</span>
+<span class="sd">    Visualization into GUI Operating Systems&quot;. The classification task is to distinguish days</span>
+<span class="sd">    from Oct to March (inclusive) from April to September.</span>
+
+<span class="sd">    Dataset details: http://timeseriesclassification.com/description.php?Dataset=ItalyPowerDemand</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    split: string (either &quot;TRAIN&quot; or &quot;TEST&quot;, default = &#39;TRAIN&#39;)</span>
+<span class="sd">        Whether to load the default train or test partition of the problem</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    X: pandas DataFrame with m rows and c columns</span>
+<span class="sd">        The time series data for the problem with m cases and c dimensions</span>
+<span class="sd">    y: numpy array</span>
+<span class="sd">        The class labels for each case in X</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">module_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+    <span class="n">dname</span> <span class="o">=</span> <span class="s1">&#39;data&#39;</span>
+    <span class="n">pname</span> <span class="o">=</span> <span class="s1">&#39;ItalyPowerDemand&#39;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">pname</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">split</span><span class="o">+</span><span class="s1">&#39;.ts&#39;</span>
+    <span class="n">abspath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">module_path</span><span class="p">,</span> <span class="n">dname</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_from_tsfile_to_dataframe</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_X_y</span><span class="p">:</span>
+        <span class="n">X</span><span class="p">[</span><span class="s1">&#39;class_val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="load_arrow_head_dataframe"><a class="viewcode-back" href="../../../autogen/sktime.datasets.base.html#sktime.datasets.base.load_arrow_head_dataframe">[docs]</a><span class="k">def</span> <span class="nf">load_arrow_head_dataframe</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="s1">&#39;TRAIN&#39;</span><span class="p">,</span> <span class="n">return_X_y</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads the ArrowHead time series classification problem and returns X and y</span>
+
+<span class="sd">    Dimensionality:     univariate</span>
+<span class="sd">    Series length:      251</span>
+<span class="sd">    Train cases:        36</span>
+<span class="sd">    Test cases:         175</span>
+<span class="sd">    Number of classes:  3</span>
+
+<span class="sd">    The arrowhead data consists of outlines of the images of arrowheads. The shapes of the</span>
+<span class="sd">    projectile points are converted into a time series using the angle-based method. The</span>
+<span class="sd">    classification of projectile points is an important topic in anthropology. The classes</span>
+<span class="sd">    are based on shape distinctions such as the presence and location of a notch in the</span>
+<span class="sd">    arrow. The problem in the repository is a length normalised version of that used in</span>
+<span class="sd">    Ye09shapelets. The three classes are called &quot;Avonlea&quot;, &quot;Clovis&quot; and &quot;Mix&quot;.&quot;</span>
+
+<span class="sd">    Dataset details: http://timeseriesclassification.com/description.php?Dataset=ArrowHead</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    split: string (either &quot;TRAIN&quot; or &quot;TEST&quot;, default = &#39;TRAIN&#39;)</span>
+<span class="sd">        Whether to load the default train or test partition of the problem</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    X: pandas DataFrame with m rows and c columns</span>
+<span class="sd">        The time series data for the problem with m cases and c dimensions</span>
+<span class="sd">    y: numpy array</span>
+<span class="sd">        The class labels for each case in X</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">module_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+    <span class="n">dname</span> <span class="o">=</span> <span class="s1">&#39;data&#39;</span>
+    <span class="n">pname</span> <span class="o">=</span> <span class="s1">&#39;ArrowHead&#39;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">pname</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">split</span><span class="o">+</span><span class="s1">&#39;.ts&#39;</span>
+    <span class="n">abspath</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">module_path</span><span class="p">,</span> <span class="n">dname</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_from_tsfile_to_dataframe</span><span class="p">(</span><span class="n">abspath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">return_X_y</span><span class="p">:</span>
+        <span class="n">X</span><span class="p">[</span><span class="s1">&#39;class_val&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,497 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sktime.transformers.compose module &mdash; sktime  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sktime.transformers.example_transformers module" href="sktime.transformers.example_transformers.html" />
+    <link rel="prev" title="sktime.transformers.base module" href="sktime.transformers.base.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> sktime
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="sktime.html">sktime package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="sktime.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="sktime.classifiers.html">sktime.classifiers package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sktime.datasets.html">sktime.datasets package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sktime.regressors.html">sktime.regressors package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="sktime.transformers.html">sktime.transformers package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="sktime.transformers.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sktime.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extension.html">Extension Guidelines</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">sktime</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="sktime.html">sktime package</a> &raquo;</li>
+        
+          <li><a href="sktime.transformers.html">sktime.transformers package</a> &raquo;</li>
+        
+      <li>sktime.transformers.compose module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autogen/sktime.transformers.compose.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-sktime.transformers.compose">
+<span id="sktime-transformers-compose-module"></span><h1>sktime.transformers.compose module<a class="headerlink" href="#module-sktime.transformers.compose" title="Permalink to this headline">¶</a></h1>
+<p>Meta Transformers module</p>
+<p>This module has meta-transformers that is build using the pre-existing
+transformers as building blocks.</p>
+<dl class="class">
+<dt id="sktime.transformers.compose.TSColumnTransformer">
+<em class="property">class </em><code class="descclassname">sktime.transformers.compose.</code><code class="descname">TSColumnTransformer</code><span class="sig-paren">(</span><em>transformers</em>, <em>remainder='drop'</em>, <em>sparse_threshold=0.3</em>, <em>n_jobs=1</em>, <em>transformer_weights=None</em>, <em>preserve_dataframe=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/compose.html#TSColumnTransformer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.compose.TSColumnTransformer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.compose._column_transformer.ColumnTransformer</span></code></p>
+<p>Applies transformers to columns of an array or pandas DataFrame. Simply takes the column transformer from sklearn
+and adds capability to handle pandas dataframe.</p>
+<p>This estimator allows different columns or column subsets of the input
+to be transformed separately and the features generated by each transformer
+will be concatenated to form a single feature space.
+This is useful for heterogeneous or columnar data, to combine several
+feature extraction mechanisms or transformations into a single transformer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transformers</strong> (<em>list of tuples</em>) – <p>List of (name, transformer, column(s)) tuples specifying the
+transformer objects to be applied to subsets of the data.
+name : string</p>
+<blockquote>
+<div>Like in Pipeline and FeatureUnion, this allows the transformer and
+its parameters to be set using <code class="docutils literal notranslate"><span class="pre">set_params</span></code> and searched in grid
+search.</div></blockquote>
+<dl class="docutils">
+<dt>transformer <span class="classifier-delimiter">:</span> <span class="classifier">estimator or {‘passthrough’, ‘drop’}</span></dt>
+<dd>Estimator must support <cite>fit</cite> and <cite>transform</cite>. Special-cased
+strings ‘drop’ and ‘passthrough’ are accepted as well, to
+indicate to drop the columns or to pass them through untransformed,
+respectively.</dd>
+<dt>column(s) <span class="classifier-delimiter">:</span> <span class="classifier">string or int, array-like of string or int, slice, boolean mask array or callable</span></dt>
+<dd>Indexes the data on its second axis. Integers are interpreted as
+positional columns, while strings can reference DataFrame columns
+by name.  A scalar string or int should be used where
+<code class="docutils literal notranslate"><span class="pre">transformer</span></code> expects X to be a 1d array-like (vector),
+otherwise a 2d array will be passed to the transformer.
+A callable is passed the input data <cite>X</cite> and can return any of the
+above.</dd>
+</dl>
+</li>
+<li><strong>remainder</strong> (<em>{'drop'</em><em>, </em><em>'passthrough'}</em><em> or </em><em>estimator</em><em>, </em><em>default 'drop'</em>) – By default, only the specified columns in <cite>transformers</cite> are
+transformed and combined in the output, and the non-specified
+columns are dropped. (default of <code class="docutils literal notranslate"><span class="pre">'drop'</span></code>).
+By specifying <code class="docutils literal notranslate"><span class="pre">remainder='passthrough'</span></code>, all remaining columns that
+were not specified in <cite>transformers</cite> will be automatically passed
+through. This subset of columns is concatenated with the output of
+the transformers.
+By setting <code class="docutils literal notranslate"><span class="pre">remainder</span></code> to be an estimator, the remaining
+non-specified columns will use the <code class="docutils literal notranslate"><span class="pre">remainder</span></code> estimator. The
+estimator must support <cite>fit</cite> and <cite>transform</cite>.</li>
+<li><strong>sparse_threshold</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a><em>, </em><em>default = 0.3</em>) – If the output of the different transfromers contains sparse matrices,
+these will be stacked as a sparse matrix if the overall density is
+lower than this value. Use <code class="docutils literal notranslate"><span class="pre">sparse_threshold=0</span></code> to always return
+dense.  When the transformed output consists of all dense data, the
+stacked result will be dense, and this keyword will be ignored.</li>
+<li><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a><em>, </em><em>optional</em><em> (</em><em>default=None</em><em>)</em>) – Number of jobs to run in parallel.
+<code class="docutils literal notranslate"><span class="pre">None</span></code> means 1 unless in a <code class="xref py py-obj docutils literal notranslate"><span class="pre">joblib.parallel_backend</span></code> context.
+<code class="docutils literal notranslate"><span class="pre">-1</span></code> means using all processors. See <span class="xref std std-term">Glossary</span>
+for more details.</li>
+<li><strong>transformer_weights</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a><em>, </em><em>optional</em>) – Multiplicative weights for features per transformer. The output of the
+transformer is multiplied by these weights. Keys are transformer names,
+values the weights.</li>
+<li><strong>preserve_dataframe</strong> (<em>boolean</em>) – If True, pandas dataframe is returned.
+If False, numpy array is returned.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="sktime.transformers.compose.TSColumnTransformer.transformers_">
+<code class="descname">transformers_</code><a class="headerlink" href="#sktime.transformers.compose.TSColumnTransformer.transformers_" title="Permalink to this definition">¶</a></dt>
+<dd><p>The collection of fitted transformers as tuples of
+(name, fitted_transformer, column). <cite>fitted_transformer</cite> can be an
+estimator, ‘drop’, or ‘passthrough’. In case there were no columns
+selected, this will be the unfitted transformer.
+If there are remaining columns, the final element is a tuple of the
+form:
+(‘remainder’, transformer, remaining_columns) corresponding to the
+<code class="docutils literal notranslate"><span class="pre">remainder</span></code> parameter. If there are remaining columns, then
+<code class="docutils literal notranslate"><span class="pre">len(transformers_)==len(transformers)+1</span></code>, otherwise
+<code class="docutils literal notranslate"><span class="pre">len(transformers_)==len(transformers)</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sktime.transformers.compose.TSColumnTransformer.named_transformers_">
+<code class="descname">named_transformers_</code><a class="headerlink" href="#sktime.transformers.compose.TSColumnTransformer.named_transformers_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read-only attribute to access any transformer by given name.
+Keys are transformer names and values are the fitted transformer
+objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Bunch object, a dictionary with attribute access</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sktime.transformers.compose.TSColumnTransformer.sparse_output_">
+<code class="descname">sparse_output_</code><a class="headerlink" href="#sktime.transformers.compose.TSColumnTransformer.sparse_output_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Boolean flag indicating wether the output of <code class="docutils literal notranslate"><span class="pre">transform</span></code> is a
+sparse matrix or a dense numpy array, which depends on the output
+of the individual transformers and the <cite>sparse_threshold</cite> keyword.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sktime.transformers.compose.RowwiseTransformer">
+<em class="property">class </em><code class="descclassname">sktime.transformers.compose.</code><code class="descname">RowwiseTransformer</code><span class="sig-paren">(</span><em>transformer</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/compose.html#RowwiseTransformer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.compose.RowwiseTransformer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sktime.transformers.base.html#sktime.transformers.base.BaseTransformer" title="sktime.transformers.base.BaseTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">sktime.transformers.base.BaseTransformer</span></code></a></p>
+<p>A convenience wrapper for row-wise transformers to apply transformation to all rows.</p>
+<p>This estimator allows to create a transformer that works on all rows from a passed transformer that works on a
+single row. This is useful for applying transformers to the time-series in the rows.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>transformer</strong> (<em>estimator</em>) – An estimator that can work on a row (i.e. a univariate time-series in form of a numpy array or pandas Series.
+must support <cite>fit</cite> and <cite>transform</cite></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="sktime.transformers.compose.RowwiseTransformer.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/compose.html#RowwiseTransformer.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.compose.RowwiseTransformer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Empty fit function that does nothing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>1D array-like</em><em>, </em><em>pandas Series</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>1</em><em>)</em>) – The training input samples. Shoould not be a DataFrame.</li>
+<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a><em>, </em><em>as it is transformer on X</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>self</strong> – Returns self.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)">object</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sktime.transformers.compose.RowwiseTransformer.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/compose.html#RowwiseTransformer.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.compose.RowwiseTransformer.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calls the fit_transfor() of the per-row transformer repeatedly
+on each row.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>X</strong> (<em>1D array-like</em><em>, </em><em>pandas Series</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>1</em><em>)</em>) – The training input samples. Shoould not be a DataFrame.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>T</strong> – The transformed data</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">1D array-like, pandas Series, shape (n_samples, ..)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sktime.transformers.compose.Tabularizer">
+<em class="property">class </em><code class="descclassname">sktime.transformers.compose.</code><code class="descname">Tabularizer</code><span class="sig-paren">(</span><em>check_input=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/compose.html#Tabularizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.compose.Tabularizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="sktime.transformers.base.html#sktime.transformers.base.BaseTransformer" title="sktime.transformers.base.BaseTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">sktime.transformers.base.BaseTransformer</span></code></a></p>
+<p>A transformer that turns time-series/panel data into tabular data.</p>
+<p>This estimator converts nested pandas dataframe containing time-series/panel data with numpy arrays or pandas Series in
+dataframe cells into a tabular pandas dataframe with only primitives in cells. This is useful for transforming
+time-series/panel data into a format that is accepted by standard supervised learning algorithms (as in sklearn).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>check_input</strong> (<em>param</em>) – When set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, inputs will be validated, otherwise inputs are assumed to be valid
+and no checks are performed. Use with caution.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="sktime.transformers.compose.Tabularizer.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>y=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/compose.html#Tabularizer.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.compose.Tabularizer.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Empty fit function that does nothing. Kept here for consistency.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>1D array-like</em><em>, </em><em>pandas Series</em><em>, </em><em>shape</em><em> (</em><em>n_samples</em><em>, </em><em>1</em><em>)</em>) – The training input samples. Shoould not be a DataFrame.</li>
+<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a><em>, </em><em>as it is transformer on X</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>self</strong> – Returns self.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)">object</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sktime.transformers.compose.Tabularizer.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sktime/transformers/compose.html#Tabularizer.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sktime.transformers.compose.Tabularizer.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform nested pandas dataframe into tabular pandas dataframe.
+param X : pandas dataframe</p>
+<blockquote>
+<div>Nested dataframe with pandas series or numpy arrays in cells.</div></blockquote>
+<dl class="docutils">
+<dt>return <span class="classifier-delimiter">:</span> <span class="classifier">pandas dataframe</span></dt>
+<dd>Tabular dataframe with only primitives in cells.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sktime.transformers.compose.Tabulariser">
+<code class="descclassname">sktime.transformers.compose.</code><code class="descname">Tabulariser</code><a class="headerlink" href="#sktime.transformers.compose.Tabulariser" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#sktime.transformers.compose.Tabularizer" title="sktime.transformers.compose.Tabularizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">sktime.transformers.compose.Tabularizer</span></code></a></p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sktime.transformers.example_transformers.html" class="btn btn-neutral float-right" title="sktime.transformers.example_transformers module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="sktime.transformers.base.html" class="btn btn-neutral float-left" title="sktime.transformers.base module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Alan Turing
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
